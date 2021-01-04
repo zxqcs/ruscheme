@@ -1,32 +1,33 @@
-use std::fmt
+use std::fmt;
 
 struct Pair {
-    lhs: Option<exp>,
-    rhs: Option<exp>,
+    lhs: Option<Exp>,
+    rhs: Option<Exp>,
 }
 
+#[allow(dead_code)]
 impl Pair {
-    fn car(&self) -> Exp {
-        self.lhs
+    fn car(&self) -> &Option<Exp> {
+        &self.lhs
     }
 
-    fn cdr(&self) -> Exp {
-        self.rhs
+    fn cdr(&self) -> &Option<Exp> {
+        &self.rhs
     }
 } 
 
-fn pretty_print(x: Exp) {}
+fn pretty_print(x: &Option<Exp>) {}
 
 impl fmt::Display for Pair {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let lhs = self.lhs;
-        let rhs = self.rhs;
+        let lhs = &self.lhs;
+        let rhs = &self.rhs;
 
         write!(f, "(")?;
         pretty_print(lhs);
         write!(f, ", ")?;
         pretty_print(rhs);        
-        write!(f, ")");
+        write!(f, ")")
     }
 }
 
@@ -36,6 +37,6 @@ struct Env {}
 
 struct Procedure {}
 
-fn eval(x: Exp, y: Env) -> Result<Exp, &str> {}
+fn eval(x: Exp, y: Env) -> Result<Exp, &'static str> {Ok(x)}
 
-fn apply(p: Procedure, args: Exp) -> Result<Exp, &str> {}
+fn apply(p: Procedure, args: Exp) -> Result<Exp, &'static str> {Ok(args)}
