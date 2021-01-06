@@ -1,6 +1,5 @@
-use std::fmt;
 
-mod core {
+mod interpreter_core {
     enum Pair {
         Cons(i32, Box<Pair>),
         Nil,
@@ -59,25 +58,25 @@ mod core {
 }
 
 mod  represent{
-    use super::core::*; 
-    use std::any::Any;
+    use super::interpreter_core::Exp;
 
     /* operations on Exp which is not treated as enum methods */
-    fn is_number(exp: &dyn Any) -> bool { 
-        if exp.is::<i32>() || exp.is::<f64>() {
-            true
-        } else { false }
+    pub fn is_number(exp: &Exp) -> bool { 
+        match exp {
+            Exp::FloatNumber(_x) => true,
+            Exp::Integer(_x) => true,
+            _ => false,
+        }        
     }
 
-    fn is_string(exp: &dyn Any) -> bool { 
-        if exp.is::<String>() {
-            true
-        } else {
-            false
+    pub fn is_string(exp: &Exp) -> bool { 
+        match exp {
+            Exp::Symbol(_x) => true,
+            _ => false,
         }
     }
 
-    fn is_self_evaluating(x: &Exp) -> bool {
+    pub fn is_self_evaluating(x: &Exp) -> bool {
         if is_number(x) {
             true
         } else if is_string(x) {
@@ -85,3 +84,22 @@ mod  represent{
         } else { false }
     }
 } 
+
+#[cfg(test)]
+mod tests {
+    use super::interpreter_core::Exp;
+    use super::represent;
+
+    #[test]
+    fn test_is_number() {
+        let x = Exp::Integer(3);
+        assert_eq!(represent::is_number(&x), true);
+    }
+
+    #[test] 
+    fn test_is_string() {
+        let str = "'symbol";
+        let x = Exp::Symbol(str);
+        assert_eq!(represent::is_string(&x), true);
+    }
+}
