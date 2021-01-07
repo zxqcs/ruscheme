@@ -2,11 +2,11 @@
 
 mod core_of_interpreter {
     pub enum Pair {
-        Cons(i32, Box<Pair>),
+        Cons(Box<Exp>, Box<Pair>),
         Nil,
     }
 
-    /* almost everything is Exp to be interpreted */
+    /* everything is an Exp to be interpreted */
     pub enum Exp {
         FloatNumber(f32),
         Integer(i32),
@@ -100,8 +100,42 @@ mod  represent{
     pub fn cadr(exp: &Exp) -> Option<&Exp> {Some(exp)}
 }
 
+mod parser {
+    use std::io;
+    use std::io::prelude::*;
+    use std::fs::File;
+    use std::io::BufReader;
+
+    pub fn read_scheme_programs_from_stdin() -> Vec<String> {
+        let mut programs: Vec<String> = vec![]; 
+        let stdin = io::stdin();
+    
+        for line in stdin.lock().lines() {
+            match line {
+                Ok(line) => programs.push(line),
+                Err(_e) => break,
+            }
+        }
+        programs
+    } 
+
+    pub fn read_scheme_programs_from_file(p: &mut Vec<String>) -> io::Result<()>{
+        let f = File::open("scheme.txt")?;
+        println!("Scheme programs read.");
+        let reader = BufReader::new(f);
+        
+        for line in reader.lines() {
+            match line {
+                Ok(line) => p.push(line),
+                Err(_e) => break,
+            }
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
-mod tests {
+mod representing_tests {
     use super::core_of_interpreter::{Pair::*, Exp};
     use super::represent;
 
@@ -133,7 +167,9 @@ mod tests {
 
     #[test]
     fn test_is_pair() {
-        let x = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+        let x = Cons(Box::new(Exp::Integer(1)), 
+                     Box::new(Cons(Box::new(Exp::Integer(2)), 
+                     Box::new(Cons(Box::new(Exp::Integer(3)), Box::new(Nil))))));
         let y = Exp::List(x);
         assert_eq!(y.is_pair(), true);
     }
@@ -142,5 +178,24 @@ mod tests {
     fn test_is_quoted() {
         let x = Exp::Quote("'x");
         assert_eq!(x.is_quoted(), true);
+    }
+}
+
+#[cfg(test)]
+mod parser_tests {
+    use super::parser::*;
+
+    #[test]
+    fn read_scheme_programs_works() {
+        let mut programs: Vec<String> = vec![];
+        read_scheme_programs_from_file(&mut programs);
+        let mut item = programs.iter();
+        assert_eq!(item.next(), Some(&"(define (fac n)".to_string()));
+        assert_eq!(item.next(), Some(&"   (if (= n 1)".to_string()));
+        assert_eq!(item.next(), Some(&"        1".to_string()));
+        assert_eq!(item.next(), Some(&"       (* n".to_string()));
+
+        assert_eq!(item.next(), Some(&"          (fac (- n 1)))))".to_string()));
+        assert_eq!(item.next(), None);
     }
 }
