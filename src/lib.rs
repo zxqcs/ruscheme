@@ -106,18 +106,21 @@ mod parser {
     use std::fs::File;
     use std::io::BufReader;
 
-    pub fn read_scheme_programs_from_stdin() -> Vec<String> {
-        let mut programs: Vec<String> = vec![]; 
+    pub fn read_scheme_programs_from_stdin(p: &mut Vec<String>) -> io::Result<()> {
         let stdin = io::stdin();
     
         for line in stdin.lock().lines() {
             match line {
-                Ok(line) => programs.push(line),
+                Ok(line) => {
+                    if !line.trim().is_empty() {
+                        p.push(line);
+                    }
+                }
                 Err(_e) => break,
-            }
         }
-        programs
-    } 
+    }
+    Ok(())
+} 
 
     pub fn read_scheme_programs_from_file(p: &mut Vec<String>) -> io::Result<()>{
         let f = File::open("scheme.txt")?;
