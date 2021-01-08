@@ -137,8 +137,14 @@ mod parser {
     }
 
     pub fn tokenize(p: &mut Vec<String>) -> Vec<String> {
-        let tokens: Vec<String> = vec![];
-        
+        let mut ss: Vec<String> = p.into_iter().map(|x| x.replace("(", " ( ")).collect();
+        ss = ss.into_iter().map(|x| x.replace(")", " ) ")).collect();
+        let mut tokens: Vec<String> = vec![];
+        for  item in ss.iter() {
+            let mut v = item.trim().split_whitespace().collect::<Vec<_>>().
+                                  into_iter().map(|x| x.to_string()).collect(); 
+            tokens.append(&mut v);
+        }
         tokens
     }
 }
@@ -214,11 +220,13 @@ mod parser_tests {
         read_scheme_programs_from_file(&mut programs);
         tokens = tokenize(&mut programs);
         let s = vec!["(", "define", "(", "fac", "n", ")",
-                      "(", "if", "(", "=", "n", "1",
+                      "(", "if", "(", "=", "n", "1", ")",
                         "1", "(", "*", "n", "(", "fac",
                           "(", "-", "n",
                              "1", ")", ")", ")", ")", ")"];
-        assert_eq!(s, tokens);
+        let mut ss: Vec<String> = vec![];
+        ss = s.into_iter().map(|x| x.to_string()).collect();
+        assert_eq!(ss, tokens);
     }    
 
 }
