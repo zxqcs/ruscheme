@@ -121,12 +121,15 @@ mod parser {
 
     pub fn read_scheme_programs_from_file(p: &mut Vec<String>) -> io::Result<()>{
         let f = File::open("scheme.txt")?;
-        println!("Scheme programs read.");
         let reader = BufReader::new(f);
         
         for line in reader.lines() {
             match line {
-                Ok(line) => p.push(line),
+                Ok(line) => {
+                    if !line.trim().is_empty() {
+                        p.push(line);
+                    }
+                }
                 Err(_e) => break,
             }
         }
