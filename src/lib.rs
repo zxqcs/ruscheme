@@ -135,6 +135,12 @@ mod parser {
         }
         Ok(())
     }
+
+    pub fn tokenize(p: &mut Vec<String>) -> Vec<String> {
+        let tokens: Vec<String> = vec![];
+        
+        tokens
+    }
 }
 
 #[cfg(test)]
@@ -197,8 +203,22 @@ mod parser_tests {
         assert_eq!(item.next(), Some(&"   (if (= n 1)".to_string()));
         assert_eq!(item.next(), Some(&"        1".to_string()));
         assert_eq!(item.next(), Some(&"       (* n".to_string()));
-
         assert_eq!(item.next(), Some(&"          (fac (- n 1)))))".to_string()));
         assert_eq!(item.next(), None);
     }
+    
+    #[test]
+    fn tokenize_works() {
+        let mut programs: Vec<String> = vec![];
+        let mut tokens: Vec<String> = vec![];
+        read_scheme_programs_from_file(&mut programs);
+        tokens = tokenize(&mut programs);
+        let s = vec!["(", "define", "(", "fac", "n", ")",
+                      "(", "if", "(", "=", "n", "1",
+                        "1", "(", "*", "n", "(", "fac",
+                          "(", "-", "n",
+                             "1", ")", ")", ")", ")", ")"];
+        assert_eq!(s, tokens);
+    }    
+
 }
