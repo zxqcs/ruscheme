@@ -28,7 +28,7 @@ mod core_of_interpreter {
 }
 
 mod  represent{
-    use super::core_of_interpreter::{ Pair, Exp};
+    use crate::core_of_interpreter::{ Pair, Exp};
 
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
@@ -103,15 +103,30 @@ mod  represent{
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
-                     if let Exp::List(Pair::Cons(x, _y)) = exp { Ok(x)} 
-                     else {Err("error happens!")}
+                     if let Exp::List(Pair::Cons(x, _y)) = exp { 
+                        Ok(x) } else {
+                            Err("error happens!")
+                        }
                 } else {Err("not a pair!")}
             }
             _ => Err("type mismatch, not even a List!")
         }
     }
-
-    pub fn cdr(exp: &Exp) -> Option<&Exp> {Some(exp)}
+/*
+    pub fn cdr(exp: &Exp) -> Result<&Exp, &'static str> {
+        match exp {
+            Exp::List(_x) => {
+                if exp.is_pair() {
+                     if let Exp::List(Pair::Cons(_x, y)) = exp { 
+                        Ok(&Exp::List(*y)) } else {
+                            Err("error happens!")
+                        }
+                } else {Err("not a pair!")}
+            }
+            _ => Err("type mismatch, not even a List!")
+        }
+    }
+*/    
 
     pub fn cadr(exp: &Exp) -> Option<&Exp> {Some(exp)}
 }
@@ -121,7 +136,7 @@ mod parser {
     use std::io::prelude::*;
     use std::fs::File;
     use std::io::BufReader;
-    use super::core_of_interpreter::Exp;
+    use crate::core_of_interpreter::Exp;
 
     pub fn read_scheme_programs_from_stdin(p: &mut Vec<String>) -> io::Result<()> {
         let stdin = io::stdin();
@@ -176,7 +191,7 @@ mod parser {
 
 #[cfg(test)]
 mod representing_tests {
-    use super::core_of_interpreter::{Pair::*, Exp};
+    use crate::core_of_interpreter::{Pair::*, Exp};
     use crate::represent::*;
 
     #[test]
@@ -244,12 +259,23 @@ mod representing_tests {
         if let Ok(Exp::Symbol(x)) = car(&exp) {
             assert_eq!(x.to_string(), "define");
         };
+    }
+/*
+    #[test]
+    fn test_cdr() {
+        let s = &Exp::List(Cons(Box::new(Exp::Integer(3)), Box::new(Cons(Box::new(Exp::Integer(4)),
+                                                     Box::new(Nil)))));
+        if let &Exp::List(Cons(x, y)) = s {
+            let z = Box::new(Cons(Box::new(Exp::Integer(4)), Box::new(Nil)));
+            assert_eq!(z, *y);
         }
+    }
+*/
 }
 
 #[cfg(test)]
 mod parser_tests {
-    use super::parser::*;
+    use crate::parser::*;
 
     #[test]
     fn read_scheme_programs_works() {
