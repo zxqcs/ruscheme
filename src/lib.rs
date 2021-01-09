@@ -1,5 +1,6 @@
 /* a Scheme interpreter implemented by Rust */
-
+// any chain of pairs where the last element has () as it's cdr is a proper list
+// in Scheme
 mod core_of_interpreter {
     pub enum Pair {
         Cons(Box<Exp>, Box<Pair>),
@@ -27,15 +28,20 @@ mod core_of_interpreter {
 }
 
 mod  represent{
-    use super::core_of_interpreter::Exp;
+    use super::core_of_interpreter::{ Pair, Exp};
 
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
     impl Exp {
         pub fn is_pair(&self) -> bool { 
             match self {
-                Exp::List(_x) => true,
-                _ => false,
+                Exp::List(x) => {
+                    match x {
+                        Pair::Nil => false,
+                        _ => true,
+                    }
+                }
+                    _ => false,
             }
         }
 
@@ -93,7 +99,17 @@ mod  represent{
         pub fn is_cond(exp: &Exp) -> bool { true }
     }
     /* operations on List variant of Exp */
-    pub fn car(exp: &Exp) -> Option<&Exp> {Some(exp)}
+    pub fn car(exp: &Exp) -> Result<&Exp, &'static str> {
+        match exp {
+            Exp::List(_x) => {
+                if exp.is_pair() {
+                     if let Exp::List(Pair::Cons(x, _y)) = exp { Ok(x)} 
+                     else {Err("error happens!")}
+                } else {Err("not a pair!")}
+            }
+            _ => Err("type mismatch, not even a List!")
+        }
+    }
 
     pub fn cdr(exp: &Exp) -> Option<&Exp> {Some(exp)}
 
@@ -105,6 +121,7 @@ mod parser {
     use std::io::prelude::*;
     use std::fs::File;
     use std::io::BufReader;
+    use super::core_of_interpreter::Exp;
 
     pub fn read_scheme_programs_from_stdin(p: &mut Vec<String>) -> io::Result<()> {
         let stdin = io::stdin();
@@ -119,8 +136,8 @@ mod parser {
                 Err(_e) => break,
         }
     }
-    Ok(())
-} 
+        Ok(())
+    } 
 
     pub fn read_scheme_programs_from_file(p: &mut Vec<String>) -> io::Result<()>{
         let f = File::open("scheme.txt")?;
@@ -150,12 +167,17 @@ mod parser {
         }
         tokens
     }
+
+    pub fn assemble_abstract_syntax_tree(v: &Vec<String>) -> Exp {
+        let x: Exp = Exp::FloatNumber(9.0);
+        x
+    }
 }
 
 #[cfg(test)]
 mod representing_tests {
     use super::core_of_interpreter::{Pair::*, Exp};
-    use super::represent;
+    use crate::represent::*;
 
     #[test]
     fn test_is_number() {
@@ -189,7 +211,11 @@ mod representing_tests {
                      Box::new(Cons(Box::new(Exp::Integer(2)), 
                      Box::new(Cons(Box::new(Exp::Integer(3)), Box::new(Nil))))));
         let y = Exp::List(x);
+        
+        let z = Nil;
+        let s = Exp::List(z);
         assert_eq!(y.is_pair(), true);
+        assert_eq!(s.is_pair(), false);
     }
 
     #[test]
@@ -197,6 +223,28 @@ mod representing_tests {
         let x = Exp::Quote("'x");
         assert_eq!(x.is_quoted(), true);
     }
+
+    #[test]
+    fn test_car() {
+        // (define (square x) (* x  x))
+        let x = Exp::Symbol("define");
+        let y = Cons(Box::new(Exp::Symbol("square")), 
+                     Box::new(Cons(Box::new(Exp::Symbol("x")),
+                                   Box::new(Nil))));
+        let z = Cons(Box::new(Exp::Symbol("*")),
+                     Box::new(Cons(Box::new(Exp::Symbol("x")),
+                                   Box::new(Cons(Box::new(Exp::Symbol("x")),
+                                                 Box::new(Nil))))));
+
+        let exp = Exp::List(
+                     Cons(Box::new(x), 
+                          Box::new(Cons(Box::new(Exp::List(y)),
+                                        Box::new(Cons(Box::new(Exp::List(z)),
+                                                      Box::new(Nil)))))));
+        if let Ok(Exp::Symbol(x)) = car(&exp) {
+            assert_eq!(x.to_string(), "define");
+        };
+        }
 }
 
 #[cfg(test)]
@@ -231,5 +279,4 @@ mod parser_tests {
         ss = s.into_iter().map(|x| x.to_string()).collect();
         assert_eq!(ss, tokens);
     }    
-
 }
