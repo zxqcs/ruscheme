@@ -116,15 +116,6 @@ mod  represent{
         }
     }
    
-    
-    pub fn cdr(exp: &Exp) -> Result<&Exp, &'static str>  {
-        let s = cdr_helper(exp);
-        match s {
-            Ok(&x) => { x.unwrap()}
-
-        }
-    }
-
     pub fn cdr_helper(exp: &Exp) -> Result<&Box<Pair>, &'static str> {
         match exp {
             Exp::List(_x) => {
