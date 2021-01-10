@@ -1,13 +1,16 @@
 /* a Scheme interpreter implemented by Rust */
 // any chain of pairs where the last element has () as it's cdr is a proper list
 // in Scheme
+#[allow(dead_code)]
 mod core_of_interpreter {
+    #[derive(Debug)]
     pub enum Pair {
         Cons(Box<Exp>, Box<Pair>),
         Nil,
     }
 
     /* everything is an Exp to be interpreted */
+    #[derive(Debug)]
     pub enum Exp {
         FloatNumber(f32),
         Integer(i32),
@@ -138,6 +141,7 @@ mod parser {
     use std::io::BufReader;
     use crate::core_of_interpreter::Exp;
 
+    #[allow(dead_code)]
     pub fn read_scheme_programs_from_stdin(p: &mut Vec<String>) -> io::Result<()> {
         let stdin = io::stdin();
     
@@ -154,6 +158,7 @@ mod parser {
         Ok(())
     } 
 
+    #[allow(dead_code)]
     pub fn read_scheme_programs_from_file(p: &mut Vec<String>) -> io::Result<()>{
         let f = File::open("scheme.txt")?;
         let reader = BufReader::new(f);
@@ -171,6 +176,7 @@ mod parser {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn tokenize(p: &mut Vec<String>) -> Vec<String> {
         let mut ss: Vec<String> = p.into_iter().map(|x| x.replace("(", " ( ")).collect();
         ss = ss.into_iter().map(|x| x.replace(")", " ) ")).collect();
@@ -183,6 +189,7 @@ mod parser {
         tokens
     }
 
+    #[allow(dead_code)]
     pub fn assemble_abstract_syntax_tree(v: &Vec<String>) -> Exp {
         let x: Exp = Exp::FloatNumber(9.0);
         x
