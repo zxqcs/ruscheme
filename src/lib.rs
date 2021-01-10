@@ -2,7 +2,7 @@
 // any chain of pairs where the last element has () as it's cdr is a proper list
 // in Scheme
 #[allow(dead_code)]
-mod core_of_interpreter {
+pub mod core_of_interpreter {
     #[derive(Debug)]
     pub enum Pair {
         Cons(Box<Exp>, Box<Pair>),
@@ -115,13 +115,22 @@ mod  represent{
             _ => Err("type mismatch, not even a List!")
         }
     }
-/*
-    pub fn cdr(exp: &Exp) -> Result<&Exp, &'static str> {
+   
+    
+    pub fn cdr(exp: &Exp) -> Result<&Exp, &'static str>  {
+        let s = cdr_helper(exp);
+        match s {
+            Ok(&x) => { x.unwrap()}
+
+        }
+    }
+
+    pub fn cdr_helper(exp: &Exp) -> Result<&Box<Pair>, &'static str> {
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
-                     if let Exp::List(Pair::Cons(_x, y)) = exp { 
-                        Ok(&Exp::List(*y)) } else {
+                    if let Exp::List(Pair::Cons(_x, y)) = exp { 
+                        Ok(y) } else {
                             Err("error happens!")
                         }
                 } else {Err("not a pair!")}
@@ -129,7 +138,6 @@ mod  represent{
             _ => Err("type mismatch, not even a List!")
         }
     }
-*/    
 
     pub fn cadr(exp: &Exp) -> Option<&Exp> {Some(exp)}
 }
@@ -267,17 +275,6 @@ mod representing_tests {
             assert_eq!(x.to_string(), "define");
         };
     }
-/*
-    #[test]
-    fn test_cdr() {
-        let s = &Exp::List(Cons(Box::new(Exp::Integer(3)), Box::new(Cons(Box::new(Exp::Integer(4)),
-                                                     Box::new(Nil)))));
-        if let &Exp::List(Cons(x, y)) = s {
-            let z = Box::new(Cons(Box::new(Exp::Integer(4)), Box::new(Nil)));
-            assert_eq!(z, *y);
-        }
-    }
-*/
 }
 
 #[cfg(test)]
