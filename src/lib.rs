@@ -30,7 +30,7 @@ pub mod core_of_interpreter {
     fn apply(p: Procedure, args: Exp) -> Result<Exp, &'static str> {Ok(args)}
 }
 
-mod  represent{
+pub mod  represent{
     use crate::core_of_interpreter::{ Pair, Exp};
 
     /* operatons on Exp as enum methods */
@@ -116,14 +116,13 @@ mod  represent{
         }
     }
    
-    /*
-    pub fn cdr<'a, 'b>(exp: &'a Exp, item: &'b Pair) -> Result<&'a Exp, &'static str> {
+    pub fn cdr<'a> (exp: &'a Exp) -> Result<Exp<'a>, &'static str> {
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
                     if let Exp::List(Pair::Cons(_x, y)) = exp { 
-                        item = &(*y.to_owned());
-                        Ok(&Exp::List(*item)) } else {
+                        let z = Exp::List(y);
+                        Ok(z )} else {
                             Err("error happens!")
                         }
                 } else {Err("not a pair!")}
@@ -131,7 +130,6 @@ mod  represent{
             _ => Err("type mismatch, not even a List!")
         }
     }
-*/
     //pub fn cadr(exp: &Exp) -> Option<&Exp> {Some(exp)}
 }
 
