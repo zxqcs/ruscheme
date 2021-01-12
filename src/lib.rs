@@ -4,17 +4,17 @@
 #[allow(dead_code)]
 pub mod core_of_interpreter {
     #[derive(Debug)]
-    pub enum Pair {
-        Cons(Box<Exp>, Box<Pair>),
+    pub enum Pair<'a> {
+        Cons(Box<&'a Exp<'a>>, Box<&'a Pair<'a>>),
         Nil,
     }
 
     /* everything is an Exp to be interpreted */
     #[derive(Debug)]
-    pub enum Exp {
+    pub enum Exp<'a> {
         FloatNumber(f32),
         Integer(i32),
-        List(Pair),
+        List(&'a Pair<'a>),
         Symbol(&'static str),
         Quote(&'static str),
         SchemeString(&'static str),
@@ -35,10 +35,10 @@ mod  represent{
 
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
-    impl Exp {
+    impl<'a> Exp<'a> {
         pub fn is_pair(&self) -> bool { 
             match self {
-                Exp::List(x) => {
+                &Exp::List(x) => {
                     match x {
                         Pair::Nil => false,
                         _ => true,
@@ -102,7 +102,7 @@ mod  represent{
         pub fn is_cond(exp: &Exp) -> bool { true }
     }
     /* operations on List variant of Exp */
-    pub fn car(exp: &Exp) -> Result<&Exp, &'static str> {
+    pub fn car<'a>(exp: &'a Exp) -> Result<&'a Exp<'a>, &'static str> {
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
@@ -116,12 +116,14 @@ mod  represent{
         }
     }
    
-    pub fn cdr_helper(exp: &Exp) -> Result<&Box<Pair>, &'static str> {
+    /*
+    pub fn cdr<'a, 'b>(exp: &'a Exp, item: &'b Pair) -> Result<&'a Exp, &'static str> {
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
                     if let Exp::List(Pair::Cons(_x, y)) = exp { 
-                        Ok(y) } else {
+                        item = &(*y.to_owned());
+                        Ok(&Exp::List(*item)) } else {
                             Err("error happens!")
                         }
                 } else {Err("not a pair!")}
@@ -129,8 +131,8 @@ mod  represent{
             _ => Err("type mismatch, not even a List!")
         }
     }
-
-    pub fn cadr(exp: &Exp) -> Option<&Exp> {Some(exp)}
+*/
+    //pub fn cadr(exp: &Exp) -> Option<&Exp> {Some(exp)}
 }
 
 mod parser {
@@ -228,15 +230,15 @@ mod representing_tests {
 
     #[test]
     fn test_is_pair() {
-        let x = Cons(Box::new(Exp::Integer(1)), 
-                     Box::new(Cons(Box::new(Exp::Integer(2)), 
-                     Box::new(Cons(Box::new(Exp::Integer(3)), Box::new(Nil))))));
-        let y = Exp::List(x);
-        
-        let z = Nil;
+        let a = Box::new(&Exp::Integer(1));
+        let b = Box::new(&Exp::Integer(2));
+        let c = Box::new(&Exp::Integer(3));
+        let d = Box::new(&Nil); 
+        let x = &Cons(c, d);
+        let y = &Cons(b, Box::new(x));
+        let z = &Cons(a, Box::new(y));
         let s = Exp::List(z);
-        assert_eq!(y.is_pair(), true);
-        assert_eq!(s.is_pair(), false);
+        assert_eq!(s.is_pair(), true);
     }
 
     #[test]
@@ -248,20 +250,34 @@ mod representing_tests {
     #[test]
     fn test_car() {
         // (define (square x) (* x  x))
-        let x = Exp::Symbol("define");
-        let y = Cons(Box::new(Exp::Symbol("square")), 
-                     Box::new(Cons(Box::new(Exp::Symbol("x")),
-                                   Box::new(Nil))));
-        let z = Cons(Box::new(Exp::Symbol("*")),
-                     Box::new(Cons(Box::new(Exp::Symbol("x")),
-                                   Box::new(Cons(Box::new(Exp::Symbol("x")),
-                                                 Box::new(Nil))))));
-
-        let exp = Exp::List(
-                     Cons(Box::new(x), 
-                          Box::new(Cons(Box::new(Exp::List(y)),
-                                        Box::new(Cons(Box::new(Exp::List(z)),
-                                                      Box::new(Nil)))))));
+        let f1 = Box::new(&Exp::Symbol("define"));
+        let y = Box::new(&Exp::Symbol("square"));
+        let z = Box::new(&Exp::Symbol("x"));
+        let a = Box::new(&Exp::Symbol("*"));
+        let b = Box::new(&Exp::Symbol("x"));
+        let c = Box::new(&Exp::Symbol("x"));
+        let d1 = Box::new(&Nil);
+        let d2 = Box::new(&Nil);
+        let d3 = Box::new(&Nil);
+        // represent (* x x)
+        let s1 = &Cons(c, d1);
+        let s2 = &Cons(b, Box::new(s1));
+        let t1 = &Cons(a, Box::new(s2)); 
+        let t2 = &Exp::List(t1);
+        let f3 = Box::new(t2);
+        // represent (square x)
+        let s3 = &Cons(z, d2);
+        let t3 = Box::new(s3);
+        let t4 = &Cons(y, t3);
+        let v = &Exp::List(t4);
+        let f2 = Box::new(v);
+        // represent (define (square x) (* x x))
+        let t5 = &Cons(f3, d3);
+        let t6 = Box::new(t5);
+        let t7 = &Cons(f2, t6);
+        let t8 = Box::new(t7);
+        let t9 = &Cons(f1, t8);
+        let exp = &Exp::List(t9);
         if let Ok(Exp::Symbol(x)) = car(&exp) {
             assert_eq!(x.to_string(), "define");
         };
