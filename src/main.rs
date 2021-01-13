@@ -41,4 +41,7 @@ fn main() {
         
         println!("{:?}", t2);
         println!("{:?}", cdr(t2).unwrap());
+
+        let ref lhs = cdr(t2).unwrap();
+        println!("{:?}", lhs);
 }

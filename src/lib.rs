@@ -9,6 +9,27 @@ pub mod core_of_interpreter {
         Nil,
     }
 
+    impl<'a> PartialEq for Pair<'a> {
+        fn eq(&self, other: &Self) -> bool {
+            match self{
+                Pair::Nil => {
+                    match other {
+                        Pair::Nil => true,
+                        _ => false,
+                    }
+                },
+                Pair::Cons(x, y) => {
+                    match other {
+                        Pair::Nil => false,
+                        Pair::Cons(x1, y1) => {
+                            if x == x1 && y == y1 { true } else { false }
+                        },
+                    }
+                },
+            }
+        }
+    }
+
     /* everything is an Exp to be interpreted */
     #[derive(Debug)]
     pub enum Exp<'a> {
@@ -18,6 +39,66 @@ pub mod core_of_interpreter {
         Symbol(&'static str),
         Quote(&'static str),
         SchemeString(&'static str),
+    }
+
+    impl<'a> PartialEq for Exp<'a> {
+        fn eq(&self, other: &Self) -> bool {
+            match self {
+                Exp::FloatNumber(x) => {
+                    match other {
+                        Exp::FloatNumber(y) => {
+                            if x == y { true } else { false }
+                        },
+                        _ => false,
+                    }
+                },
+                
+                Exp::Integer(x) => {
+                    match other {
+                        Exp::Integer(y) => {
+                            if x == y { true } else { false }
+                        },
+                        _ => false,
+                    }
+                },
+
+                Exp::List(x) => {
+                    match other {
+                        Exp::List(y) => {
+                            if x == y { true } else { false }
+                        },
+                        _ => false,
+                    }
+                },
+                
+                Exp::Symbol(x) => {
+                    match other {
+                        Exp::Symbol(y) => {
+                            if x == y { true } else { false }
+                        },
+                        _ => false,
+                    }
+                },
+
+                Exp::Quote(x) => {
+                    match other {
+                        Exp::Quote(y) => {
+                            if x == y { true } else { false }
+                        },
+                        _ => false,
+                    }
+                },
+
+                Exp::SchemeString(x) => {
+                    match other {
+                        Exp::SchemeString(y) => {
+                            if x == y { true } else { false }
+                        },
+                        _ => false,
+                    }
+                },
+            }
+        }
     }
 
     struct Env {}
@@ -247,6 +328,7 @@ mod representing_tests {
 
     #[test]
     fn test_car() {
+        // It's painful to build List in Rust...
         // (define (square x) (* x  x))
         let f1 = Box::new(&Exp::Symbol("define"));
         let y = Box::new(&Exp::Symbol("square"));
@@ -279,6 +361,119 @@ mod representing_tests {
         if let Ok(Exp::Symbol(x)) = car(&exp) {
             assert_eq!(x.to_string(), "define");
         };
+    }
+
+    #[test]
+    fn test_cdr() {
+        let f1 = Box::new(&Exp::Symbol("define"));
+        let y = Box::new(&Exp::Symbol("square"));
+        let z = Box::new(&Exp::Symbol("x"));
+        let a = Box::new(&Exp::Symbol("*"));
+        let b = Box::new(&Exp::Symbol("x"));
+        let c = Box::new(&Exp::Symbol("x"));
+        let d1 = Box::new(&Nil);
+        let d2 = Box::new(&Nil);
+        let d3 = Box::new(&Nil);
+        // represent (* x x)
+        let s1 = &Cons(c, d1);
+        let s2 = &Cons(b, Box::new(s1));
+        let t1 = &Cons(a, Box::new(s2)); 
+        let t2 = &Exp::List(t1);
+        let f3 = Box::new(t2);
+        // represent (square x)
+        let s3 = &Cons(z, d2);
+        let t3 = Box::new(s3);
+        let t4 = &Cons(y, t3);
+        let v = &Exp::List(t4);
+        let f2 = Box::new(v);
+        // represent (define (square x) (* x x))
+        let t5 = &Cons(f3, d3);
+        let t6 = Box::new(t5);
+        let t7 = &Cons(f2, t6);
+        let t8 = Box::new(t7);
+        let t9 = &Cons(f1, t8);
+        let exp = &Exp::List(t9);
+
+        assert_eq!(cdr(exp), Ok(Exp::List(t7)));
+        assert_eq!(car(&cdr(exp).unwrap()), Ok(v));
+        assert_eq!(cdr(car(&cdr(exp).unwrap()).unwrap()), Ok(Exp::List(&s3)));
+    }
+
+    #[test]
+    fn test_equlity() {
+       // (define (square x) (* x  x))
+       let f1 = Box::new(&Exp::Symbol("define"));
+       let y = Box::new(&Exp::Symbol("square"));
+       let z = Box::new(&Exp::Symbol("x"));
+       let a = Box::new(&Exp::Symbol("*"));
+       let b = Box::new(&Exp::Symbol("x"));
+       let c = Box::new(&Exp::Symbol("x"));
+       let d1 = Box::new(&Nil);
+       let d2 = Box::new(&Nil);
+       let d3 = Box::new(&Nil);
+       // represent (* x x)
+       let s1 = &Cons(c, d1);
+       let s2 = &Cons(b, Box::new(s1));
+       let t1 = &Cons(a, Box::new(s2)); 
+       let t2 = &Exp::List(t1);
+       let f3 = Box::new(t2);
+       // represent (square x)
+       let s3 = &Cons(z, d2);
+       let t3 = Box::new(s3);
+       let t4 = &Cons(y, t3);
+       let v = &Exp::List(t4);
+       let f2 = Box::new(v);
+       // represent (define (square x) (* x x))
+       let t5 = &Cons(f3, d3);
+       let t6 = Box::new(t5);
+       let t7 = &Cons(f2, t6);
+       let t8 = Box::new(t7);
+       let t9 = &Cons(f1, t8);
+       let exp = &Exp::List(t9); 
+       assert_eq!(cdr(&exp).unwrap(), Exp::List(t7));
+       assert_eq!(cdr(v), Ok(Exp::List(s3)));
+       let ref lrh = Nil;
+       let rhs = &Nil;
+       assert_eq!(lrh , rhs);
+       assert_eq!(cdr(&Exp::List(s1)), Ok(Exp::List(&Nil)));
+       
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_inequality() {
+        let f1 = Box::new(&Exp::Symbol("define"));
+        let y = Box::new(&Exp::Symbol("square"));
+        let z = Box::new(&Exp::Symbol("x"));
+        let a = Box::new(&Exp::Symbol("*"));
+        let b = Box::new(&Exp::Symbol("x"));
+        let c = Box::new(&Exp::Symbol("x"));
+        let d1 = Box::new(&Nil);
+        let d2 = Box::new(&Nil);
+        let d3 = Box::new(&Nil);
+        // represent (* x x)
+        let s1 = &Cons(c, d1);
+        let s2 = &Cons(b, Box::new(s1));
+        let t1 = &Cons(a, Box::new(s2)); 
+        let t2 = &Exp::List(t1);
+        let f3 = Box::new(t2);
+        // represent (square x)
+        let s3 = &Cons(z, d2);
+        let t3 = Box::new(s3);
+        let t4 = &Cons(y, t3);
+        let v = &Exp::List(t4);
+        let f2 = Box::new(v);
+        // represent (define (square x) (* x x))
+        let t5 = &Cons(f3, d3);
+        let t6 = Box::new(t5);
+        let t7 = &Cons(f2, t6);
+        let t8 = Box::new(t7);
+        let t9 = &Cons(f1, t8);
+        let exp = &Exp::List(t9);  
+        assert_eq!(t2, exp);
+        assert_eq!(t2, v);
+        assert_eq!(t1, s2);
+        assert_eq!(t7, t9);
     }
 }
 
