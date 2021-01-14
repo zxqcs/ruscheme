@@ -1,5 +1,8 @@
-use ruscheme::core_of_interpreter::{Pair::*, Exp};
-use ruscheme::represent::cdr;
+mod core_of_interpreter;
+mod represent;
+mod parser;
+use represent::represent::*;
+use core_of_interpreter::core_of_interpreter::{Exp, Pair::*};
 
 
 fn main() {
