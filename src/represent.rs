@@ -99,6 +99,21 @@ pub mod  represent{
         }
     }
     //pub fn cadr(exp: &Exp) -> Option<&Exp> {Some(exp)}
+
+    pub fn is_tagged_list(exp: &Exp, tag: &'static str) -> bool {
+        if exp.is_pair() {
+            if let Ok(Exp::Symbol(x)) = car(exp) {
+                match x {
+                    tag => true,
+                    _ => false,
+                }
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
 }
 
 #[cfg(test)]
@@ -298,6 +313,43 @@ mod tests {
         assert_eq!(t2, v);
         assert_eq!(t1, s2);
         assert_eq!(t7, t9);
+    }
+
+    #[test]
+    fn test_tagged_list() {
+        let tag = "define";
+        let f1 = Box::new(&Exp::Symbol("define"));
+        let y = Box::new(&Exp::Symbol("square"));
+        let z = Box::new(&Exp::Symbol("x"));
+        let a = Box::new(&Exp::Symbol("*"));
+        let b = Box::new(&Exp::Symbol("x"));
+        let c = Box::new(&Exp::Symbol("x"));
+        let d1 = Box::new(&Nil);
+        let d2 = Box::new(&Nil);
+        let d3 = Box::new(&Nil);
+        // represent (* x x)
+        let s1 = &Cons(c, d1);
+        let s2 = &Cons(b, Box::new(s1));
+        let t1 = &Cons(a, Box::new(s2)); 
+        let t2 = &Exp::List(t1);
+        let f3 = Box::new(t2);
+        // represent (square x)
+        let s3 = &Cons(z, d2);
+        let t3 = Box::new(s3);
+        let t4 = &Cons(y, t3);
+        let v = &Exp::List(t4);
+        let f2 = Box::new(v);
+        // represent (define (square x) (* x x))
+        let t5 = &Cons(f3, d3);
+        let t6 = Box::new(t5);
+        let t7 = &Cons(f2, t6);
+        let t8 = Box::new(t7);
+        let t9 = &Cons(f1, t8);
+        let exp = &Exp::List(t9);  
+        let tag1 = "define";
+        assert_eq!(is_tagged_list(exp, tag1), true);
+        assert_eq!(is_tagged_list(t2, "*"), true);
+        assert_eq!(is_tagged_list(v, "square"), true);
     }
 }
 
