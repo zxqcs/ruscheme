@@ -1,2 +1,2 @@
 # ruscheme
-A MIT-Scheme interpreter implemented in Rust language.
+A subset of Scheme interpreter is being developed in Rust language.
