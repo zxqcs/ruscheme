@@ -1,6 +1,6 @@
-#[allow(dead_code)]
+#![allow(unused_variables)]
 pub mod core_of_interpreter {
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     pub enum Pair<'a> {
         Cons(Box<&'a Exp<'a>>, Box<&'a Pair<'a>>),
         Nil,
@@ -28,7 +28,8 @@ pub mod core_of_interpreter {
     }
 
     /* everything is an Exp to be interpreted */
-    #[derive(Debug)]
+    #[allow(dead_code)]
+    #[derive(Debug, Clone)]
     pub enum Exp<'a> {
         FloatNumber(f32),
         Integer(i32),
@@ -103,7 +104,9 @@ pub mod core_of_interpreter {
     struct Procedure {}
 
     /* core function of the Scheme interpreter */
+    #[allow(dead_code)]
     fn eval(exp: Exp, env: Env) -> Result<Exp, &'static str> {Ok(exp)}
 
+    #[allow(dead_code)]
     fn apply(p: Procedure, args: Exp) -> Result<Exp, &'static str> {Ok(args)}
 }

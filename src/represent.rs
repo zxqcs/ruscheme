@@ -1,4 +1,5 @@
 
+#![allow(unused_variables)]
 pub mod  represent{
     use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
     /* operatons on Exp as enum methods */
@@ -70,12 +71,12 @@ pub mod  represent{
         pub fn is_cond(exp: &Exp) -> bool { true }
     }
     /* operations on List variant of Exp */
-    pub fn car<'a>(exp: &'a Exp) -> Result<&'a Exp<'a>, &'static str> {
+    pub fn car<'a>(exp: &'a Exp) -> Result< Exp<'a>, &'static str> {
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
                      if let Exp::List(Pair::Cons(x, _y)) = exp { 
-                        Ok(x) } else {
+                        Ok((***x).clone()) } else {
                             Err("error happens!")
                         }
                 } else {Err("not a pair!")}
@@ -84,6 +85,7 @@ pub mod  represent{
         }
     }
    
+    #[allow(dead_code)]
     pub fn cdr<'a> (exp: &'a Exp) -> Result<Exp<'a>, &'static str> {
         match exp {
             Exp::List(_x) => {
@@ -98,8 +100,27 @@ pub mod  represent{
             _ => Err("type mismatch, not even a List!")
         }
     }
-    //pub fn cadr(exp: &Exp) -> Option<&Exp> {Some(exp)}
+   
+    #[allow(dead_code)]
+    pub fn cadr<'a>(exp: &'a Exp) -> Result< Exp<'a>, &'static str> {
+        match exp {
+            Exp::List(_x) => {
+                if exp.is_pair() {
+                    if let Exp::List(Pair::Cons(_x, y)) = exp { 
+                        if let Pair::Cons(a, _b) = **y {
+                            Ok((***a).clone())
+                        }
+                        else {
+                            Err("error happens!")
+                        }
+                    } else {Err("not a pair!")}
+            } else { Err ("type mismatch, not a proper List!")} 
+        },
+            _ => Err("type mismatch, not even a List!")
+        }
+    }
 
+    #[allow(dead_code)]
     pub fn is_tagged_list(exp: &Exp, tag: &'static str) -> bool {
         if exp.is_pair() {
             if let Ok(Exp::Symbol(x)) = car(exp) {
@@ -234,8 +255,8 @@ mod tests {
         let exp = &Exp::List(t9);
 
         assert_eq!(cdr(exp), Ok(Exp::List(t7)));
-        assert_eq!(car(&cdr(exp).unwrap()), Ok(v));
-        assert_eq!(cdr(car(&cdr(exp).unwrap()).unwrap()), Ok(Exp::List(&s3)));
+        assert_eq!(&car(&cdr(exp).unwrap()).unwrap(), v);
+        assert_eq!(cdr(&car(&cdr(exp).unwrap()).unwrap()), Ok(Exp::List(&s3)));
     }
 
     #[test]
