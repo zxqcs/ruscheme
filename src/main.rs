@@ -25,15 +25,15 @@ fn main() {
         let s3 = &Cons(z, d2);
         let t3 = Box::new(s3);
         let t4 = &Cons(y, t3);
-        let v = &Exp::List(t4);
-        let f2 = Box::new(v);
+        let v =  Exp::List(t4);
+        let f2 = Box::new(&v);
         // represent (define (square x) (* x x))
         let t5 = &Cons(f3, d3);
         let t6 = Box::new(t5);
         let t7 = &Cons(f2, t6);
         let t8 = Box::new(t7);
         let t9 = &Cons(f1, t8);
-        let exp = &Exp::List(t9);
+        let exp = Exp::List(t9);
 
         let ref rhs =  Exp::List(t7);  
         println!("{:?}", rhs);
@@ -41,10 +41,4 @@ fn main() {
 
         println!("{:?}", v);
         println!("{:?}", cdr(v).unwrap());   
-        
-        println!("{:?}", t2);
-        println!("{:?}", cdr(t2).unwrap());
-
-        let ref lhs = cdr(t2).unwrap();
-        println!("{:?}", lhs);
 }

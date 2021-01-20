@@ -71,7 +71,7 @@ pub mod  represent{
         pub fn is_cond(exp: &Exp) -> bool { true }
     }
     /* operations on List variant of Exp */
-    pub fn car<'a>(exp: &'a Exp) -> Result< Exp<'a>, &'static str> {
+    pub fn car<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
@@ -86,7 +86,7 @@ pub mod  represent{
     }
    
     #[allow(dead_code)]
-    pub fn cdr<'a> (exp: &'a Exp) -> Result<Exp<'a>, &'static str> {
+    pub fn cdr<'a> (exp: Exp<'a>) -> Result<Exp<'a>, &'static str> {
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
@@ -102,7 +102,7 @@ pub mod  represent{
     }
    
     #[allow(dead_code)]
-    pub fn cadr<'a>(exp: &'a Exp) -> Result< Exp<'a>, &'static str> {
+    pub fn cadr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
         match exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
@@ -121,7 +121,27 @@ pub mod  represent{
     }
 
     #[allow(dead_code)]
-    pub fn is_tagged_list(exp: &Exp, tag: &'static str) -> bool {
+    pub fn cddr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+        let s1 = cdr(exp).unwrap();
+        cdr(s1)
+    }
+
+    #[allow(dead_code)]
+    pub fn caddr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+        let s1 = cdr(exp).unwrap();
+        let s2 = cdr(s1).unwrap();
+        car(s2)
+    }
+
+    
+    pub fn caadr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+        let s1 = cdr(exp).unwrap();
+        let s2 = car(s1).unwrap();
+        car(s2)
+    }
+    
+    #[allow(dead_code)]
+    pub fn is_tagged_list(exp: Exp, tag: &'static str) -> bool {
         if exp.is_pair() {
             if let Ok(Exp::Symbol(x)) = car(exp) {
                 match x {
@@ -217,8 +237,8 @@ mod tests {
         let t7 = &Cons(f2, t6);
         let t8 = Box::new(t7);
         let t9 = &Cons(f1, t8);
-        let exp = &Exp::List(t9);
-        if let Ok(Exp::Symbol(x)) = car(&exp) {
+        let exp = Exp::List(t9);
+        if let Ok(Exp::Symbol(x)) = car(exp) {
             assert_eq!(x.to_string(), "define");
         };
     }
@@ -252,11 +272,10 @@ mod tests {
         let t7 = &Cons(f2, t6);
         let t8 = Box::new(t7);
         let t9 = &Cons(f1, t8);
-        let exp = &Exp::List(t9);
+        let exp = Exp::List(t9);
 
-        assert_eq!(cdr(exp), Ok(Exp::List(t7)));
-        assert_eq!(&car(&cdr(exp).unwrap()).unwrap(), v);
-        assert_eq!(cdr(&car(&cdr(exp).unwrap()).unwrap()), Ok(Exp::List(&s3)));
+        assert_eq!(cdr(exp.clone()), Ok(Exp::List(t7)));
+        assert_eq!(car(cdr(exp.clone()).unwrap()).unwrap(), (*v).clone());
     }
 
     #[test]
@@ -289,13 +308,13 @@ mod tests {
        let t7 = &Cons(f2, t6);
        let t8 = Box::new(t7);
        let t9 = &Cons(f1, t8);
-       let exp = &Exp::List(t9); 
-       assert_eq!(cdr(&exp).unwrap(), Exp::List(t7));
-       assert_eq!(cdr(v), Ok(Exp::List(s3)));
+       let exp = Exp::List(t9); 
+       assert_eq!(cdr(exp).unwrap(), Exp::List(t7));
+       assert_eq!(cdr((*v).clone()), Ok(Exp::List(s3)));
        let ref lrh = Nil;
        let rhs = &Nil;
        assert_eq!(lrh , rhs);
-       assert_eq!(cdr(&Exp::List(s1)), Ok(Exp::List(&Nil)));
+       assert_eq!(cdr(Exp::List(s1)), Ok(Exp::List(&Nil)));
        
     }
 
@@ -366,11 +385,11 @@ mod tests {
         let t7 = &Cons(f2, t6);
         let t8 = Box::new(t7);
         let t9 = &Cons(f1, t8);
-        let exp = &Exp::List(t9);  
+        let exp = Exp::List(t9);  
         let tag1 = "define";
         assert_eq!(is_tagged_list(exp, tag1), true);
-        assert_eq!(is_tagged_list(t2, "*"), true);
-        assert_eq!(is_tagged_list(v, "square"), true);
+        assert_eq!(is_tagged_list((*t2).clone(), "*"), true);
+        assert_eq!(is_tagged_list((*v).clone(), "square"), true);
     }
 }
 
