@@ -54,21 +54,155 @@ pub mod  represent{
             self.is_number() || self.is_string()
         }
 
-        pub fn is_tagged(exp: &Exp, tag: &'static str) -> bool { true }
+        /* operations on Exp as function */
+        pub fn is_assignment(exp: Exp) -> bool { 
+            is_tagged_list(exp, "set!")
+        }
 
-        pub fn is_assignment(exp: &Exp) -> bool { true }
+        #[allow(dead_code)]
+        pub fn assignment_variable(exp: Exp) -> Exp {
+            Exp::List(&Pair::Nil)
+        }
 
-        pub fn is_definiton(exp: &Exp) -> bool { true }
+        #[allow(dead_code)]
+        pub fn assignment_value(exp: Exp) -> Exp {
+            caddr(exp).unwrap()
+        }
 
-        pub fn is_lambda(exp: &Exp) -> bool { true }
+        #[allow(dead_code)]
+        pub fn is_definiton(exp: Exp) -> bool { 
+            is_tagged_list(exp, "define")
+        }
 
-        pub fn is_if(exp: &Exp) -> bool { true }
+        #[allow(dead_code)]
+        pub fn definition_variable(exp: Exp) -> Exp {
+            Exp::List(&Pair::Nil)
+        }
+        
 
-        pub fn is_begin(exp: &Exp) -> bool { true }
+        #[allow(dead_code)]
+        pub fn definition_value(exp: Exp) -> Exp {
+            Exp::List(&Pair::Nil)
+        }
 
-        pub fn is_application(exp: &Exp) -> bool { true }
+        #[allow(dead_code)]
+        pub fn is_lambda(exp: Exp) -> bool { 
+            is_tagged_list(exp, "lambda")
+        }
 
-        pub fn is_cond(exp: &Exp) -> bool { true }
+        #[allow(dead_code)]
+        pub fn lambda_parameters(exp: Exp) -> Exp {
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn lambda_body(exp: Exp) -> Exp {
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn make_lambda<'b> (parameters: Exp<'b>, body: Exp<'b>) -> Exp<'b> {
+            Exp::List(&Pair::Nil)
+        }
+        
+        #[allow(dead_code)]
+        pub fn is_if(exp: Exp) -> bool { 
+            is_tagged_list(exp, "if")
+        }
+
+      
+        #[allow(dead_code)]
+        pub fn if_predicate(exp: Exp) -> Exp {
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn if_consequent(exp: Exp) -> Exp {
+            Exp::List(&Pair::Nil)
+        }
+
+
+        #[allow(dead_code)]
+        pub fn if_alternative(exp: Exp) -> Exp {
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn make_if<'b>(predicate: Exp<'b>, consequent: Exp<'b>, alternative: Exp<'b>) -> Exp<'b>{
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn is_begin(exp: Exp) -> bool { 
+            is_tagged_list(exp, "begin")
+        }
+        
+        #[allow(dead_code)]
+        pub fn begin_actions(exp: Exp) -> Exp {
+
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn is_last_exp(seq: Exp) -> bool {
+            true
+        }
+
+        #[allow(dead_code)]
+        pub fn is_first_exp(seq: Exp) -> bool {
+            true
+        }
+
+        #[allow(dead_code)]
+        pub fn rest_exps(seq: Exp) -> Exp {
+
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn sequence_to_exp(seq: Exp) -> Exp {
+
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn make_begin(seq: Exp) -> Exp {
+
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn is_application(exp: Exp) -> bool { 
+            exp.is_pair()
+        }
+
+        #[allow(dead_code)]
+        pub fn operator(exp: Exp) -> Exp {
+
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn operands(exp: Exp) -> Exp {
+
+            Exp::List(&Pair::Nil)
+        }
+
+        #[allow(dead_code)]
+        pub fn no_operands(ops: Exp) -> bool {
+            true
+        }
+
+        #[allow(dead_code)]
+        pub fn first_operand(ops: Exp) -> Exp {
+            car(ops).unwrap()
+        }
+
+        #[allow(dead_code)]
+        pub fn rest_operands(ops: Exp) -> Exp {
+            cdr(ops).unwrap()
+        }
+/* note that cond related procedures are ommited */
     }
     /* operations on List variant of Exp */
     pub fn car<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
@@ -245,7 +379,8 @@ mod tests {
         assert_eq!(car(cdr(exp.clone()).unwrap()).unwrap(), *v);
         assert_eq!(cadr(exp.clone()).unwrap(), *v);
         assert_eq!(caddr(exp.clone()).unwrap(), *t2);
-        assert_eq!(caadr(exp).unwrap(), Exp::Symbol("square"));
+        assert_eq!(caadr(exp.clone()).unwrap(), Exp::Symbol("square"));
+        assert_eq!(cddr(exp.clone()).unwrap(), Exp::List(t5));
     }
 
     #[test]
