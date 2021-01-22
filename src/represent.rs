@@ -286,7 +286,14 @@ pub mod  represent{
         let s2 = car(s1).unwrap();
         car(s2)
     }
-    
+
+    #[allow(dead_code)]
+    pub fn cdadr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+        let s1 = cadr(exp).unwrap();
+        let s2 = cdr(s1);
+        s2
+    }
+
     #[allow(dead_code)]
     pub fn is_tagged_list(exp: Exp, tag: &'static str) -> bool {
         if exp.is_pair() {
