@@ -293,25 +293,27 @@ pub mod  represent{
         let s2 = cdr(s1);
         s2
     }
-/* 
+    
     #[allow(dead_code)]
-    pub fn scheme_cons<'a>(lhs: Exp<'a>, rhs: Exp<'a>) -> Exp<'a> {
+    pub fn scheme_cons(lhs: Exp, rhs: Exp) -> Exp {
         match rhs {
-            Exp::List(&Pair::Nil) => {
-                let s1 = Box::new(&Pair::Nil);
-                let s2 = Box::new(&lhs);
-                Exp::List(&Pair::Cons(s2, s1))
-            }
+            Exp::List(x) => {
+                let s1 = Box::new(lhs);
+                let s2 = Box::new(x);
+                let s3 = Pair::Cons(s1, s2);
+                Exp::List(s3)
+            },
             _ => {
-                let d = Box::new(&Pair::Nil);
-                let s1 = Box::new(&rhs);
-                let s2 = Pair::Cons(s1, d);
-                Exp::List(&s2) 
-            }
+                let s1 = Box::new(Pair::Nil);
+                let s2 = Box::new(rhs);
+                let s3 = Pair::Cons(s2, s1); 
+                let s4 = Box::new(s3);
+                let s5 = Box::new(lhs);
+                Exp::List(Pair::Cons(s5, s4))
+            },
         }
     }
 
-*/
     #[allow(dead_code)]
     pub fn is_tagged_list(exp: Exp, tag: &'static str) -> bool {
         if exp.is_pair() {
@@ -497,5 +499,11 @@ mod tests {
         assert_eq!(is_tagged_list(exp.clone(), tag1), true);
         assert_ne!(is_tagged_list(exp.clone(), "apple"), true);
     }
-}
 
+    #[test]
+    fn build_dual_list() {
+    }
+
+    // lambda case: (lambda (x) (+ x x))
+    // ((lambda (x) (+ x x)) 4) =>  8
+}
