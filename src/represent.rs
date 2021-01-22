@@ -133,7 +133,7 @@ pub mod  represent{
         car(s2)
     }
 
-    
+    #[allow(dead_code)]
     pub fn caadr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
         let s1 = cdr(exp).unwrap();
         let s2 = car(s1).unwrap();
@@ -145,7 +145,7 @@ pub mod  represent{
         if exp.is_pair() {
             if let Ok(Exp::Symbol(x)) = car(exp) {
                 match x {
-                    tag => true,
+                    t if t == tag => true,
                     _ => false,
                 }
             } else {
@@ -207,7 +207,7 @@ mod tests {
     }
 
     #[test]
-    fn test_car() {
+    fn test_list_operatioins() {
         // It's painful to build List in Rust...
         // (define (square x) (* x  x))
         let f1 = Box::new(&Exp::Symbol("define"));
@@ -238,44 +238,14 @@ mod tests {
         let t8 = Box::new(t7);
         let t9 = &Cons(f1, t8);
         let exp = Exp::List(t9);
-        if let Ok(Exp::Symbol(x)) = car(exp) {
+        if let Ok(Exp::Symbol(x)) = car(exp.clone()) {
             assert_eq!(x.to_string(), "define");
         };
-    }
-
-    #[test]
-    fn test_cdr() {
-        let f1 = Box::new(&Exp::Symbol("define"));
-        let y = Box::new(&Exp::Symbol("square"));
-        let z = Box::new(&Exp::Symbol("x"));
-        let a = Box::new(&Exp::Symbol("*"));
-        let b = Box::new(&Exp::Symbol("x"));
-        let c = Box::new(&Exp::Symbol("x"));
-        let d1 = Box::new(&Nil);
-        let d2 = Box::new(&Nil);
-        let d3 = Box::new(&Nil);
-        // represent (* x x)
-        let s1 = &Cons(c, d1);
-        let s2 = &Cons(b, Box::new(s1));
-        let t1 = &Cons(a, Box::new(s2)); 
-        let t2 = &Exp::List(t1);
-        let f3 = Box::new(t2);
-        // represent (square x)
-        let s3 = &Cons(z, d2);
-        let t3 = Box::new(s3);
-        let t4 = &Cons(y, t3);
-        let v = &Exp::List(t4);
-        let f2 = Box::new(v);
-        // represent (define (square x) (* x x))
-        let t5 = &Cons(f3, d3);
-        let t6 = Box::new(t5);
-        let t7 = &Cons(f2, t6);
-        let t8 = Box::new(t7);
-        let t9 = &Cons(f1, t8);
-        let exp = Exp::List(t9);
-
         assert_eq!(cdr(exp.clone()), Ok(Exp::List(t7)));
-        assert_eq!(car(cdr(exp.clone()).unwrap()).unwrap(), (*v).clone());
+        assert_eq!(car(cdr(exp.clone()).unwrap()).unwrap(), *v);
+        assert_eq!(cadr(exp.clone()).unwrap(), *v);
+        assert_eq!(caddr(exp.clone()).unwrap(), *t2);
+        assert_eq!(caadr(exp).unwrap(), Exp::Symbol("square"));
     }
 
     #[test]
@@ -309,50 +279,17 @@ mod tests {
        let t8 = Box::new(t7);
        let t9 = &Cons(f1, t8);
        let exp = Exp::List(t9); 
-       assert_eq!(cdr(exp).unwrap(), Exp::List(t7));
+       assert_eq!(cdr(exp.clone()).unwrap(), Exp::List(t7));
        assert_eq!(cdr((*v).clone()), Ok(Exp::List(s3)));
        let ref lrh = Nil;
        let rhs = &Nil;
        assert_eq!(lrh , rhs);
        assert_eq!(cdr(Exp::List(s1)), Ok(Exp::List(&Nil)));
-       
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_inequality() {
-        let f1 = Box::new(&Exp::Symbol("define"));
-        let y = Box::new(&Exp::Symbol("square"));
-        let z = Box::new(&Exp::Symbol("x"));
-        let a = Box::new(&Exp::Symbol("*"));
-        let b = Box::new(&Exp::Symbol("x"));
-        let c = Box::new(&Exp::Symbol("x"));
-        let d1 = Box::new(&Nil);
-        let d2 = Box::new(&Nil);
-        let d3 = Box::new(&Nil);
-        // represent (* x x)
-        let s1 = &Cons(c, d1);
-        let s2 = &Cons(b, Box::new(s1));
-        let t1 = &Cons(a, Box::new(s2)); 
-        let t2 = &Exp::List(t1);
-        let f3 = Box::new(t2);
-        // represent (square x)
-        let s3 = &Cons(z, d2);
-        let t3 = Box::new(s3);
-        let t4 = &Cons(y, t3);
-        let v = &Exp::List(t4);
-        let f2 = Box::new(v);
-        // represent (define (square x) (* x x))
-        let t5 = &Cons(f3, d3);
-        let t6 = Box::new(t5);
-        let t7 = &Cons(f2, t6);
-        let t8 = Box::new(t7);
-        let t9 = &Cons(f1, t8);
-        let exp = &Exp::List(t9);  
-        assert_eq!(t2, exp);
-        assert_eq!(t2, v);
-        assert_eq!(t1, s2);
-        assert_eq!(t7, t9);
+        
+        assert_ne!(*t2, exp.clone());
+        assert_ne!(t2, v);
+        assert_ne!(t1, s2);
+        assert_ne!(t7, t9);
     }
 
     #[test]
@@ -387,9 +324,10 @@ mod tests {
         let t9 = &Cons(f1, t8);
         let exp = Exp::List(t9);  
         let tag1 = "define";
-        assert_eq!(is_tagged_list(exp, tag1), true);
+        assert_eq!(is_tagged_list(exp.clone(), tag1), true);
         assert_eq!(is_tagged_list((*t2).clone(), "*"), true);
         assert_eq!(is_tagged_list((*v).clone(), "square"), true);
+        assert_ne!(is_tagged_list(exp.clone(), "apple"), true);
     }
 }
 

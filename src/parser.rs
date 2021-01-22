@@ -54,7 +54,7 @@ pub mod parser {
     }
 
     #[allow(dead_code)]
-    pub fn assemble_abstract_syntax_tree(v: &Vec<String>) -> Exp {
+    pub fn assemble_abstract_syntax_tree(_v: &Vec<String>) -> Exp {
         let x: Exp = Exp::FloatNumber(9.0);
         x
     }

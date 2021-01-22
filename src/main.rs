@@ -1,7 +1,6 @@
 mod core_of_interpreter;
 mod represent;
 mod parser;
-use represent::represent::*;
 use core_of_interpreter::core_of_interpreter::{Exp, Pair::*};
 
 
@@ -33,12 +32,5 @@ fn main() {
         let t7 = &Cons(f2, t6);
         let t8 = Box::new(t7);
         let t9 = &Cons(f1, t8);
-        let exp = Exp::List(t9);
-
-        let ref rhs =  Exp::List(t7);  
-        println!("{:?}", rhs);
-        println!("{:?}", cdr (exp).unwrap());
-
-        println!("{:?}", v);
-        println!("{:?}", cdr(v).unwrap());   
+        let _exp = Exp::List(t9);
 }
