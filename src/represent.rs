@@ -4,10 +4,10 @@ pub mod  represent{
     use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
-    impl<'a> Exp<'a> {
+    impl Exp {
         pub fn is_pair(&self) -> bool { 
             match self {
-                &Exp::List(x) => {
+                Exp::List(x) => {
                     match x {
                         Pair::Nil => false,
                         _ => true,
@@ -61,7 +61,7 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn assignment_variable(exp: Exp) -> Exp {
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
@@ -76,13 +76,13 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn definition_variable(exp: Exp) -> Exp {
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
         
 
         #[allow(dead_code)]
         pub fn definition_value(exp: Exp) -> Exp {
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
@@ -92,17 +92,17 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn lambda_parameters(exp: Exp) -> Exp {
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
         pub fn lambda_body(exp: Exp) -> Exp {
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
-        pub fn make_lambda<'b> (parameters: Exp<'b>, body: Exp<'b>) -> Exp<'b> {
-            Exp::List(&Pair::Nil)
+        pub fn make_lambda (parameters: Exp, body: Exp) -> Exp {
+            Exp::List(Pair::Nil)
         }
         
         #[allow(dead_code)]
@@ -113,23 +113,23 @@ pub mod  represent{
       
         #[allow(dead_code)]
         pub fn if_predicate(exp: Exp) -> Exp {
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
         pub fn if_consequent(exp: Exp) -> Exp {
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
 
         #[allow(dead_code)]
         pub fn if_alternative(exp: Exp) -> Exp {
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
-        pub fn make_if<'b>(predicate: Exp<'b>, consequent: Exp<'b>, alternative: Exp<'b>) -> Exp<'b>{
-            Exp::List(&Pair::Nil)
+        pub fn make_if(predicate: Exp, consequent: Exp, alternative: Exp) -> Exp{
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
@@ -140,7 +140,7 @@ pub mod  represent{
         #[allow(dead_code)]
         pub fn begin_actions(exp: Exp) -> Exp {
 
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
@@ -156,19 +156,19 @@ pub mod  represent{
         #[allow(dead_code)]
         pub fn rest_exps(seq: Exp) -> Exp {
 
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
         pub fn sequence_to_exp(seq: Exp) -> Exp {
 
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
         pub fn make_begin(seq: Exp) -> Exp {
 
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
@@ -179,13 +179,13 @@ pub mod  represent{
         #[allow(dead_code)]
         pub fn operator(exp: Exp) -> Exp {
 
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
         pub fn operands(exp: Exp) -> Exp {
 
-            Exp::List(&Pair::Nil)
+            Exp::List(Pair::Nil)
         }
 
         #[allow(dead_code)]
@@ -205,12 +205,12 @@ pub mod  represent{
 /* note that cond related procedures are ommited */
     }
     /* operations on List variant of Exp */
-    pub fn car<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
-        match exp {
+    pub fn car(exp: Exp) -> Result<Exp, &'static str> {
+        match &exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
                      if let Exp::List(Pair::Cons(x, _y)) = exp { 
-                        Ok((***x).clone()) } else {
+                        Ok(*x.clone()) } else {
                             Err("error happens!")
                         }
                 } else {Err("not a pair!")}
@@ -220,12 +220,12 @@ pub mod  represent{
     }
    
     #[allow(dead_code)]
-    pub fn cdr<'a> (exp: Exp<'a>) -> Result<Exp<'a>, &'static str> {
-        match exp {
+    pub fn cdr(exp: Exp) -> Result<Exp, &'static str> {
+        match &exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
                     if let Exp::List(Pair::Cons(_x, y)) = exp { 
-                        let z = Exp::List(y);
+                        let z = Exp::List(*y);
                         Ok(z )} else {
                             Err("error happens!")
                         }
@@ -236,13 +236,13 @@ pub mod  represent{
     }
    
     #[allow(dead_code)]
-    pub fn cadr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
-        match exp {
+    pub fn cadr(exp: Exp) -> Result< Exp, &'static str> {
+        match &exp {
             Exp::List(_x) => {
                 if exp.is_pair() {
                     if let Exp::List(Pair::Cons(_x, y)) = exp { 
-                        if let Pair::Cons(a, _b) = **y {
-                            Ok((***a).clone())
+                        if let Pair::Cons(a, _b) = *y {
+                            Ok(*a.clone())
                         }
                         else {
                             Err("error happens!")
@@ -255,45 +255,63 @@ pub mod  represent{
     }
 
     #[allow(dead_code)]
-    pub fn cddr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+    pub fn cddr(exp: Exp) -> Result< Exp, &'static str> {
         let s1 = cdr(exp).unwrap();
         cdr(s1)
     }
 
     #[allow(dead_code)]
-    pub fn cdddr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+    pub fn cdddr(exp: Exp) -> Result< Exp, &'static str> {
         let s1 = cdr(exp).unwrap();
         let s2 = cdr(s1).unwrap();
         cdr(s2)
     }
     
     #[allow(dead_code)]
-    pub fn cadddr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+    pub fn cadddr(exp: Exp) -> Result< Exp, &'static str> {
         let s1 = cdddr(exp).unwrap();
         car(s1)
     }
 
     #[allow(dead_code)]
-    pub fn caddr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+    pub fn caddr(exp: Exp) -> Result< Exp, &'static str> {
         let s1 = cdr(exp).unwrap();
         let s2 = cdr(s1).unwrap();
         car(s2)
     }
 
     #[allow(dead_code)]
-    pub fn caadr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+    pub fn caadr(exp: Exp) -> Result< Exp, &'static str> {
         let s1 = cdr(exp).unwrap();
         let s2 = car(s1).unwrap();
         car(s2)
     }
 
     #[allow(dead_code)]
-    pub fn cdadr<'a>(exp: Exp<'a>) -> Result< Exp<'a>, &'static str> {
+    pub fn cdadr(exp: Exp) -> Result< Exp, &'static str> {
         let s1 = cadr(exp).unwrap();
         let s2 = cdr(s1);
         s2
     }
+/* 
+    #[allow(dead_code)]
+    pub fn scheme_cons<'a>(lhs: Exp<'a>, rhs: Exp<'a>) -> Exp<'a> {
+        match rhs {
+            Exp::List(&Pair::Nil) => {
+                let s1 = Box::new(&Pair::Nil);
+                let s2 = Box::new(&lhs);
+                Exp::List(&Pair::Cons(s2, s1))
+            }
+            _ => {
+                let d = Box::new(&Pair::Nil);
+                let s1 = Box::new(&rhs);
+                let s2 = Pair::Cons(s1, d);
+                Exp::List(&s2) 
+            }
+        }
+    }
 
+*/
     #[allow(dead_code)]
     pub fn is_tagged_list(exp: Exp, tag: &'static str) -> bool {
         if exp.is_pair() {
@@ -343,13 +361,13 @@ mod tests {
 
     #[test]
     fn test_is_pair() {
-        let a = Box::new(&Exp::Integer(1));
-        let b = Box::new(&Exp::Integer(2));
-        let c = Box::new(&Exp::Integer(3));
-        let d = Box::new(&Nil); 
-        let x = &Cons(c, d);
-        let y = &Cons(b, Box::new(x));
-        let z = &Cons(a, Box::new(y));
+        let a = Box::new(Exp::Integer(1));
+        let b = Box::new(Exp::Integer(2));
+        let c = Box::new(Exp::Integer(3));
+        let d = Box::new(Nil); 
+        let x = Cons(c, d);
+        let y = Cons(b, Box::new(x));
+        let z = Cons(a, Box::new(y));
         let s = Exp::List(z);
         assert_eq!(s.is_pair(), true);
     }
@@ -364,124 +382,119 @@ mod tests {
     fn test_list_operatioins() {
         // It's painful to build List in Rust...
         // (define (square x) (* x  x))
-        let f1 = Box::new(&Exp::Symbol("define"));
-        let y = Box::new(&Exp::Symbol("square"));
-        let z = Box::new(&Exp::Symbol("x"));
-        let a = Box::new(&Exp::Symbol("*"));
-        let b = Box::new(&Exp::Symbol("x"));
-        let c = Box::new(&Exp::Symbol("x"));
-        let d1 = Box::new(&Nil);
-        let d2 = Box::new(&Nil);
-        let d3 = Box::new(&Nil);
+        let f1 = Box::new(Exp::Symbol("define"));
+        let y = Box::new(Exp::Symbol("square"));
+        let z = Box::new(Exp::Symbol("x"));
+        let a = Box::new(Exp::Symbol("*"));
+        let b = Box::new(Exp::Symbol("x"));
+        let c = Box::new(Exp::Symbol("x"));
+        let d1 = Box::new(Nil);
+        let d2 = Box::new(Nil);
+        let d3 = Box::new(Nil);
         // represent (* x x)
-        let s1 = &Cons(c, d1);
-        let s2 = &Cons(b, Box::new(s1));
-        let t1 = &Cons(a, Box::new(s2)); 
-        let t2 = &Exp::List(t1);
+        let s1 = Cons(c, d1);
+        let s2 = Cons(b, Box::new(s1));
+        let t1 = Cons(a, Box::new(s2)); 
+        let t2 = Exp::List(t1);
+        let x4 = t2.clone();
         let f3 = Box::new(t2);
         // represent (square x)
-        let s3 = &Cons(z, d2);
+        let s3 = Cons(z, d2);
+        let x5 = s3.clone();
         let t3 = Box::new(s3);
-        let t4 = &Cons(y, t3);
-        let v = &Exp::List(t4);
+        let t4 = Cons(y, t3);
+        let v = Exp::List(t4);
+        let x2 = v.clone();
         let f2 = Box::new(v);
         // represent (define (square x) (* x x))
-        let t5 = &Cons(f3, d3);
+        let t5 = Cons(f3, d3);
+        let x3 = t5.clone();
         let t6 = Box::new(t5);
-        let t7 = &Cons(f2, t6);
+        let t7 = Cons(f2, t6);
+        let x1 = Exp::List(t7.clone());
         let t8 = Box::new(t7);
-        let t9 = &Cons(f1, t8);
+        let t9 = Cons(f1, t8);
         let exp = Exp::List(t9);
         if let Ok(Exp::Symbol(x)) = car(exp.clone()) {
             assert_eq!(x.to_string(), "define");
         };
-        assert_eq!(cdr(exp.clone()), Ok(Exp::List(t7)));
-        assert_eq!(car(cdr(exp.clone()).unwrap()).unwrap(), *v);
-        assert_eq!(cadr(exp.clone()).unwrap(), *v);
-        assert_eq!(caddr(exp.clone()).unwrap(), *t2);
         assert_eq!(caadr(exp.clone()).unwrap(), Exp::Symbol("square"));
-        assert_eq!(cddr(exp.clone()).unwrap(), Exp::List(t5));
+        assert_eq!(car(exp.clone()).unwrap(), Exp::Symbol("define"));
+        assert_eq!(cdr(exp.clone()).unwrap(), x1);
+        assert_eq!(cadr(exp.clone()).unwrap(), x2);
+        assert_eq!(cddr(exp.clone()).unwrap(), Exp::List(x3));
+        assert_eq!(cdddr(exp.clone()).unwrap(), Exp::List(Nil));
+        assert_eq!(caddr(exp.clone()).unwrap(), x4);
+        assert_eq!(cdadr(exp.clone()).unwrap(), Exp::List(x5));
     }
 
     #[test]
     fn test_equlity() {
-       // (define (square x) (* x  x))
-       let f1 = Box::new(&Exp::Symbol("define"));
-       let y = Box::new(&Exp::Symbol("square"));
-       let z = Box::new(&Exp::Symbol("x"));
-       let a = Box::new(&Exp::Symbol("*"));
-       let b = Box::new(&Exp::Symbol("x"));
-       let c = Box::new(&Exp::Symbol("x"));
-       let d1 = Box::new(&Nil);
-       let d2 = Box::new(&Nil);
-       let d3 = Box::new(&Nil);
-       // represent (* x x)
-       let s1 = &Cons(c, d1);
-       let s2 = &Cons(b, Box::new(s1));
-       let t1 = &Cons(a, Box::new(s2)); 
-       let t2 = &Exp::List(t1);
-       let f3 = Box::new(t2);
-       // represent (square x)
-       let s3 = &Cons(z, d2);
-       let t3 = Box::new(s3);
-       let t4 = &Cons(y, t3);
-       let v = &Exp::List(t4);
-       let f2 = Box::new(v);
-       // represent (define (square x) (* x x))
-       let t5 = &Cons(f3, d3);
-       let t6 = Box::new(t5);
-       let t7 = &Cons(f2, t6);
-       let t8 = Box::new(t7);
-       let t9 = &Cons(f1, t8);
-       let exp = Exp::List(t9); 
-       assert_eq!(cdr(exp.clone()).unwrap(), Exp::List(t7));
-       assert_eq!(cdr((*v).clone()), Ok(Exp::List(s3)));
-       let ref lrh = Nil;
-       let rhs = &Nil;
-       assert_eq!(lrh , rhs);
-       assert_eq!(cdr(Exp::List(s1)), Ok(Exp::List(&Nil)));
-        
-        assert_ne!(*t2, exp.clone());
-        assert_ne!(t2, v);
-        assert_ne!(t1, s2);
-        assert_ne!(t7, t9);
+        let f1 = Box::new(Exp::Symbol("define"));
+        let y = Box::new(Exp::Symbol("square"));
+        let z = Box::new(Exp::Symbol("x"));
+        let a = Box::new(Exp::Symbol("*"));
+        let b = Box::new(Exp::Symbol("x"));
+        let c = Box::new(Exp::Symbol("x"));
+        let d1 = Box::new(Nil);
+        let d2 = Box::new(Nil);
+        let d3 = Box::new(Nil);
+        // represent (* x x)
+        let s1 = Cons(c, d1);
+        let s2 = Cons(b, Box::new(s1));
+        let t1 = Cons(a, Box::new(s2)); 
+        let t2 = Exp::List(t1);
+        let f3 = Box::new(t2);
+        // represent (square x)
+        let s3 = Cons(z, d2);
+        let t3 = Box::new(s3);
+        let t4 = Cons(y, t3);
+        let v = Exp::List(t4);
+        let f2 = Box::new(v);
+        // represent (define (square x) (* x x))
+        let t5 = Cons(f3, d3);
+        let t6 = Box::new(t5);
+        let t7 = Cons(f2, t6);
+        let t8 = Box::new(t7);
+        let t9 = Cons(f1, t8);
+        let exp = Exp::List(t9);
+        let ref lrh = Nil;
+        let rhs = &Nil;
+        assert_eq!(lrh , rhs);
     }
 
     #[test]
     fn test_tagged_list() {
-        let tag = "define";
-        let f1 = Box::new(&Exp::Symbol("define"));
-        let y = Box::new(&Exp::Symbol("square"));
-        let z = Box::new(&Exp::Symbol("x"));
-        let a = Box::new(&Exp::Symbol("*"));
-        let b = Box::new(&Exp::Symbol("x"));
-        let c = Box::new(&Exp::Symbol("x"));
-        let d1 = Box::new(&Nil);
-        let d2 = Box::new(&Nil);
-        let d3 = Box::new(&Nil);
+        let f1 = Box::new(Exp::Symbol("define"));
+        let y = Box::new(Exp::Symbol("square"));
+        let z = Box::new(Exp::Symbol("x"));
+        let a = Box::new(Exp::Symbol("*"));
+        let b = Box::new(Exp::Symbol("x"));
+        let c = Box::new(Exp::Symbol("x"));
+        let d1 = Box::new(Nil);
+        let d2 = Box::new(Nil);
+        let d3 = Box::new(Nil);
         // represent (* x x)
-        let s1 = &Cons(c, d1);
-        let s2 = &Cons(b, Box::new(s1));
-        let t1 = &Cons(a, Box::new(s2)); 
-        let t2 = &Exp::List(t1);
+        let s1 = Cons(c, d1);
+        let s2 = Cons(b, Box::new(s1));
+        let t1 = Cons(a, Box::new(s2)); 
+        let t2 = Exp::List(t1);
         let f3 = Box::new(t2);
         // represent (square x)
-        let s3 = &Cons(z, d2);
+        let s3 = Cons(z, d2);
         let t3 = Box::new(s3);
-        let t4 = &Cons(y, t3);
-        let v = &Exp::List(t4);
+        let t4 = Cons(y, t3);
+        let v = Exp::List(t4);
         let f2 = Box::new(v);
         // represent (define (square x) (* x x))
-        let t5 = &Cons(f3, d3);
+        let t5 = Cons(f3, d3);
         let t6 = Box::new(t5);
-        let t7 = &Cons(f2, t6);
+        let t7 = Cons(f2, t6);
         let t8 = Box::new(t7);
-        let t9 = &Cons(f1, t8);
-        let exp = Exp::List(t9);  
+        let t9 = Cons(f1, t8);
+        let exp = Exp::List(t9);
         let tag1 = "define";
         assert_eq!(is_tagged_list(exp.clone(), tag1), true);
-        assert_eq!(is_tagged_list((*t2).clone(), "*"), true);
-        assert_eq!(is_tagged_list((*v).clone(), "square"), true);
         assert_ne!(is_tagged_list(exp.clone(), "apple"), true);
     }
 }

@@ -1,12 +1,13 @@
 #![allow(unused_variables)]
 pub mod core_of_interpreter {
+    #[allow(dead_code)]
     #[derive(Debug, Clone)]
-    pub enum Pair<'a> {
-        Cons(Box<&'a Exp<'a>>, Box<&'a Pair<'a>>),
+    pub enum Pair {
+        Cons(Box<Exp>, Box<Pair>),
         Nil,
     }
 
-    impl<'a> PartialEq for Pair<'a> {
+    impl PartialEq for Pair {
         fn eq(&self, other: &Self) -> bool {
             match self{
                 Pair::Nil => {
@@ -30,16 +31,16 @@ pub mod core_of_interpreter {
     /* everything is an Exp to be interpreted */
     #[allow(dead_code)]
     #[derive(Debug, Clone)]
-    pub enum Exp<'a> {
+    pub enum Exp {
         FloatNumber(f32),
         Integer(i32),
-        List(&'a Pair<'a>),
+        List(Pair),
         Symbol(&'static str),
         Quote(&'static str),
         SchemeString(&'static str),
     }
 
-    impl<'a> PartialEq for Exp<'a> {
+    impl PartialEq for Exp {
         fn eq(&self, other: &Self) -> bool {
             match self {
                 Exp::FloatNumber(x) => {
