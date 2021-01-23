@@ -63,14 +63,14 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn assignment_variable(exp: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            cadr(exp).unwrap()
         }
 
         #[allow(dead_code)]
         pub fn assignment_value(exp: Exp) -> Exp {
             caddr(exp).unwrap()
         }
-
+        // definiton
         #[allow(dead_code)]
         pub fn is_definiton(exp: Exp) -> bool { 
             is_tagged_list(exp, "define")
@@ -78,15 +78,25 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn definition_variable(exp: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            if cadr(exp.clone()).unwrap().is_symbol() {
+                cadr(exp.clone()).unwrap()
+            } else {
+                caadr(exp.clone()).unwrap()
+            }
         }
         
 
         #[allow(dead_code)]
         pub fn definition_value(exp: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            if cadr(exp.clone()).unwrap().is_symbol() {
+                caddr(exp.clone()).unwrap()
+            } else {
+                make_lambda(cdadr(exp.clone()).unwrap(),
+                                    cddr(exp.clone()).unwrap())
+            }
         }
-
+        
+        // lambda
         #[allow(dead_code)]
         pub fn is_lambda(exp: Exp) -> bool { 
             is_tagged_list(exp, "lambda")
@@ -94,19 +104,21 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn lambda_parameters(exp: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            cadr(exp.clone()).unwrap()
         }
 
         #[allow(dead_code)]
         pub fn lambda_body(exp: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            cddr(exp.clone()).unwrap()
         }
 
         #[allow(dead_code)]
         pub fn make_lambda (parameters: Exp, body: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            scheme_cons(Exp::Symbol("lambda"),
+                          scheme_cons(parameters, body))
         }
-        
+
+        // if 
         #[allow(dead_code)]
         pub fn is_if(exp: Exp) -> bool { 
             is_tagged_list(exp, "if")
@@ -115,25 +127,32 @@ pub mod  represent{
       
         #[allow(dead_code)]
         pub fn if_predicate(exp: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            cadr(exp.clone()).unwrap()
         }
 
         #[allow(dead_code)]
         pub fn if_consequent(exp: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            caddr(exp.clone()).unwrap()
         }
-
 
         #[allow(dead_code)]
         pub fn if_alternative(exp: Exp) -> Exp {
-            Exp::List(Pair::Nil)
+            let s = Exp::List(Pair::Nil);
+            if cdddr(exp.clone()).unwrap() != s {
+                cadddr(exp.clone()).unwrap()
+            } else {
+                Exp::Symbol("false")
+            }
         }
 
         #[allow(dead_code)]
         pub fn make_if(predicate: Exp, consequent: Exp, alternative: Exp) -> Exp{
-            Exp::List(Pair::Nil)
+            let tag = Exp::Symbol("if");
+            scheme_cons(tag,scheme_cons(predicate,
+                      scheme_cons(consequent, alternative)))
         }
 
+        // begin
         #[allow(dead_code)]
         pub fn is_begin(exp: Exp) -> bool { 
             is_tagged_list(exp, "begin")
@@ -141,38 +160,39 @@ pub mod  represent{
         
         #[allow(dead_code)]
         pub fn begin_actions(exp: Exp) -> Exp {
-
-            Exp::List(Pair::Nil)
+            cdr(exp).unwrap()
         }
 
         #[allow(dead_code)]
         pub fn is_last_exp(seq: Exp) -> bool {
-            true
+            let null = Exp::List(Pair::Nil);
+            cdr(seq).unwrap() == null
         }
 
         #[allow(dead_code)]
-        pub fn is_first_exp(seq: Exp) -> bool {
-            true
+        pub fn first_exp(seq: Exp) -> Exp {
+            car(seq).unwrap()
         }
 
         #[allow(dead_code)]
         pub fn rest_exps(seq: Exp) -> Exp {
-
-            Exp::List(Pair::Nil)
+            cdr(seq).unwrap()
         }
-
+        // to be implemented later
         #[allow(dead_code)]
         pub fn sequence_to_exp(seq: Exp) -> Exp {
 
             Exp::List(Pair::Nil)
         }
-
+        // to be implemented later
         #[allow(dead_code)]
         pub fn make_begin(seq: Exp) -> Exp {
 
             Exp::List(Pair::Nil)
         }
 
+        // A procedure application is any compound expression that is 
+        // not one of the above expression types
         #[allow(dead_code)]
         pub fn is_application(exp: Exp) -> bool { 
             exp.is_pair()
@@ -180,19 +200,18 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn operator(exp: Exp) -> Exp {
-
-            Exp::List(Pair::Nil)
+            car(exp).unwrap()
         }
 
         #[allow(dead_code)]
         pub fn operands(exp: Exp) -> Exp {
-
-            Exp::List(Pair::Nil)
+            cdr(exp).unwrap()
         }
 
         #[allow(dead_code)]
         pub fn no_operands(ops: Exp) -> bool {
-            true
+           let null = Exp::List(Pair::Nil);
+           ops == null 
         }
 
         #[allow(dead_code)]
@@ -204,6 +223,7 @@ pub mod  represent{
         pub fn rest_operands(ops: Exp) -> Exp {
             cdr(ops).unwrap()
         }
+
 /* note that cond related procedures are ommited */
 /* operations on List variant of Exp */
     pub fn car(exp: Exp) -> Result<Exp, &'static str> {
