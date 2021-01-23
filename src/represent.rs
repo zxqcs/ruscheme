@@ -53,8 +53,10 @@ pub mod  represent{
         pub fn is_self_evaluating(&self) -> bool {
             self.is_number() || self.is_string()
         }
+    }
 
         /* operations on Exp as function */
+        #[allow(dead_code)]
         pub fn is_assignment(exp: Exp) -> bool { 
             is_tagged_list(exp, "set!")
         }
@@ -203,8 +205,7 @@ pub mod  represent{
             cdr(ops).unwrap()
         }
 /* note that cond related procedures are ommited */
-    }
-    /* operations on List variant of Exp */
+/* operations on List variant of Exp */
     pub fn car(exp: Exp) -> Result<Exp, &'static str> {
         match &exp {
             Exp::List(_x) => {
@@ -501,9 +502,28 @@ mod tests {
     }
 
     #[test]
-    fn build_dual_list() {
-    }
-
-    // lambda case: (lambda (x) (+ x x))
+    fn test_scheme_cons() {
+    // (lambda (x) (+ x x))
     // ((lambda (x) (+ x x)) 4) =>  8
+    // lambda prameters: (x) 
+    // lambda body: ((+ x x))
+        let plus = Exp::Symbol("+");
+        let x = Exp::Symbol("x");
+        let null = Exp::List(Nil);
+        //  parameters: (x)
+        let parameters = scheme_cons(x.clone(), null.clone());
+        // (x)
+        let s1 = scheme_cons(x.clone(), null.clone());
+        // (x x)
+        let s2 = scheme_cons(x.clone(), s1.clone());
+        // (+ x x)
+        let s3 = scheme_cons(plus.clone(), s2.clone());
+        // body: ((+ x x))
+        let body = scheme_cons(s3.clone(), null.clone());
+        // exp: ((x) (+ x x))
+        let exp = scheme_cons(parameters.clone(), body.clone());
+        assert_eq!(cadr(exp.clone()).unwrap(), s3.clone());
+        assert_eq!(cddr(exp.clone()).unwrap(), null.clone());
+        assert_eq!(caadr(exp.clone()).unwrap(), plus.clone());
+    }
 }
