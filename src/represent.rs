@@ -2,7 +2,7 @@
 #![allow(unused_variables)]
 pub mod  represent{
     use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
-    use crate::tool::tools::scheme_cons;
+    use crate::tool::tools::{scheme_cons};
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
     impl Exp {
@@ -182,14 +182,19 @@ pub mod  represent{
         // to be implemented later
         #[allow(dead_code)]
         pub fn sequence_to_exp(seq: Exp) -> Exp {
-
-            Exp::List(Pair::Nil)
+            let null = Exp::List(Pair::Nil);
+            if seq == null {
+                seq
+            } else if is_last_exp(seq.clone()) {
+                first_exp(seq)
+            } else {
+                make_begin(seq)
+            }
         }
         // to be implemented later
         #[allow(dead_code)]
         pub fn make_begin(seq: Exp) -> Exp {
-
-            Exp::List(Pair::Nil)
+            scheme_cons(Exp::Symbol("begin"), seq)
         }
 
         // A procedure application is any compound expression that is 
@@ -501,5 +506,10 @@ mod tests {
         let tag1 = "define";
         assert_eq!(is_tagged_list(exp.clone(), tag1), true);
         assert_ne!(is_tagged_list(exp.clone(), "apple"), true);
+    }
+
+    #[test]
+    fn test_is_if() {
+
     }
 }
