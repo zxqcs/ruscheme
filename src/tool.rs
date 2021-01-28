@@ -38,10 +38,10 @@ use crate::represent::represent::{car, cdr};
 
 #[derive(Debug, Clone)] 
     pub struct TestData{
-        if_expression: Exp,
-        begin_expression: Exp,
-        applicatioin_expressioin: Exp,
-        lambda_expression: Exp,
+        pub if_expression: Exp,
+        pub begin_expression: Exp,
+        pub applicatioin_expressioin: Exp,
+        pub lambda_expression: Exp,
     }
         
 #[allow(dead_code)]
@@ -131,7 +131,8 @@ mod test {
         let n3 = Exp::Integer(3);
         let s1 = scheme_cons(n3.clone(), null);
         let s2 = scheme_cons(n1.clone(), n2.clone());
-        let s3 = scheme_cons(s2.clone(), s1.clone());
+        let s3 = scheme_cons(n1.clone(), 
+                   scheme_cons(n2.clone(), n3.clone()));
         assert_eq!(s3, append(s2, s1));
     }
 }

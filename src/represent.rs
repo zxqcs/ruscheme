@@ -149,8 +149,10 @@ pub mod  represent{
         #[allow(dead_code)]
         pub fn make_if(predicate: Exp, consequent: Exp, alternative: Exp) -> Exp{
             let tag = Exp::Symbol("if");
+            let null = Exp::List(Pair::Nil);
             scheme_cons(tag,scheme_cons(predicate,
-                      scheme_cons(consequent, alternative)))
+                      scheme_cons(consequent, 
+                           scheme_cons(alternative, null))))
         }
 
         // begin
@@ -338,11 +340,12 @@ pub mod  represent{
         }
     }
 }
-
 #[cfg(test)]
 mod tests {
-    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair::*};
+    use crate::scheme_list;
+    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
     use super::represent::*;
+    use crate::tool::tools::{append, scheme_cons, generate_test_data };
     #[test]
     fn test_is_number() {
         let x = Exp::Integer(3);
@@ -374,10 +377,10 @@ mod tests {
         let a = Box::new(Exp::Integer(1));
         let b = Box::new(Exp::Integer(2));
         let c = Box::new(Exp::Integer(3));
-        let d = Box::new(Nil); 
-        let x = Cons(c, d);
-        let y = Cons(b, Box::new(x));
-        let z = Cons(a, Box::new(y));
+        let d = Box::new(Pair::Nil); 
+        let x = Pair::Cons(c, d);
+        let y = Pair::Cons(b, Box::new(x));
+        let z = Pair::Cons(a, Box::new(y));
         let s = Exp::List(z);
         assert_eq!(s.is_pair(), true);
     }
@@ -398,32 +401,32 @@ mod tests {
         let a = Box::new(Exp::Symbol("*"));
         let b = Box::new(Exp::Symbol("x"));
         let c = Box::new(Exp::Symbol("x"));
-        let d1 = Box::new(Nil);
-        let d2 = Box::new(Nil);
-        let d3 = Box::new(Nil);
+        let d1 = Box::new(Pair::Nil);
+        let d2 = Box::new(Pair::Nil);
+        let d3 = Box::new(Pair::Nil);
         // represent (* x x)
-        let s1 = Cons(c, d1);
-        let s2 = Cons(b, Box::new(s1));
-        let t1 = Cons(a, Box::new(s2)); 
+        let s1 = Pair::Cons(c, d1);
+        let s2 = Pair::Cons(b, Box::new(s1));
+        let t1 = Pair::Cons(a, Box::new(s2)); 
         let t2 = Exp::List(t1);
         let x4 = t2.clone();
         let f3 = Box::new(t2);
         // represent (square x)
-        let s3 = Cons(z, d2);
+        let s3 = Pair::Cons(z, d2);
         let x5 = s3.clone();
         let t3 = Box::new(s3);
-        let t4 = Cons(y, t3);
+        let t4 = Pair::Cons(y, t3);
         let v = Exp::List(t4);
         let x2 = v.clone();
         let f2 = Box::new(v);
         // represent (define (square x) (* x x))
-        let t5 = Cons(f3, d3);
+        let t5 = Pair::Cons(f3, d3);
         let x3 = t5.clone();
         let t6 = Box::new(t5);
-        let t7 = Cons(f2, t6);
+        let t7 = Pair::Cons(f2, t6);
         let x1 = Exp::List(t7.clone());
         let t8 = Box::new(t7);
-        let t9 = Cons(f1, t8);
+        let t9 = Pair::Cons(f1, t8);
         let exp = Exp::List(t9);
         if let Ok(Exp::Symbol(x)) = car(exp.clone()) {
             assert_eq!(x.to_string(), "define");
@@ -433,7 +436,7 @@ mod tests {
         assert_eq!(cdr(exp.clone()).unwrap(), x1);
         assert_eq!(cadr(exp.clone()).unwrap(), x2);
         assert_eq!(cddr(exp.clone()).unwrap(), Exp::List(x3));
-        assert_eq!(cdddr(exp.clone()).unwrap(), Exp::List(Nil));
+        assert_eq!(cdddr(exp.clone()).unwrap(), Exp::List(Pair::Nil));
         assert_eq!(caddr(exp.clone()).unwrap(), x4);
         assert_eq!(cdadr(exp.clone()).unwrap(), Exp::List(x5));
     }
@@ -446,30 +449,30 @@ mod tests {
         let a = Box::new(Exp::Symbol("*"));
         let b = Box::new(Exp::Symbol("x"));
         let c = Box::new(Exp::Symbol("x"));
-        let d1 = Box::new(Nil);
-        let d2 = Box::new(Nil);
-        let d3 = Box::new(Nil);
+        let d1 = Box::new(Pair::Nil);
+        let d2 = Box::new(Pair::Nil);
+        let d3 = Box::new(Pair::Nil);
         // represent (* x x)
-        let s1 = Cons(c, d1);
-        let s2 = Cons(b, Box::new(s1));
-        let t1 = Cons(a, Box::new(s2)); 
+        let s1 = Pair::Cons(c, d1);
+        let s2 = Pair::Cons(b, Box::new(s1));
+        let t1 = Pair::Cons(a, Box::new(s2)); 
         let t2 = Exp::List(t1);
         let f3 = Box::new(t2);
         // represent (square x)
-        let s3 = Cons(z, d2);
+        let s3 = Pair::Cons(z, d2);
         let t3 = Box::new(s3);
-        let t4 = Cons(y, t3);
+        let t4 = Pair::Cons(y, t3);
         let v = Exp::List(t4);
         let f2 = Box::new(v);
         // represent (define (square x) (* x x))
-        let t5 = Cons(f3, d3);
+        let t5 = Pair::Cons(f3, d3);
         let t6 = Box::new(t5);
-        let t7 = Cons(f2, t6);
+        let t7 = Pair::Cons(f2, t6);
         let t8 = Box::new(t7);
-        let t9 = Cons(f1, t8);
+        let t9 = Pair::Cons(f1, t8);
         let exp = Exp::List(t9);
-        let ref lrh = Nil;
-        let rhs = &Nil;
+        let ref lrh = Pair::Nil;
+        let rhs = &Pair::Nil;
         assert_eq!(lrh , rhs);
     }
 
@@ -481,27 +484,27 @@ mod tests {
         let a = Box::new(Exp::Symbol("*"));
         let b = Box::new(Exp::Symbol("x"));
         let c = Box::new(Exp::Symbol("x"));
-        let d1 = Box::new(Nil);
-        let d2 = Box::new(Nil);
-        let d3 = Box::new(Nil);
+        let d1 = Box::new(Pair::Nil);
+        let d2 = Box::new(Pair::Nil);
+        let d3 = Box::new(Pair::Nil);
         // represent (* x x)
-        let s1 = Cons(c, d1);
-        let s2 = Cons(b, Box::new(s1));
-        let t1 = Cons(a, Box::new(s2)); 
+        let s1 = Pair::Cons(c, d1);
+        let s2 = Pair::Cons(b, Box::new(s1));
+        let t1 = Pair::Cons(a, Box::new(s2)); 
         let t2 = Exp::List(t1);
         let f3 = Box::new(t2);
         // represent (square x)
-        let s3 = Cons(z, d2);
+        let s3 = Pair::Cons(z, d2);
         let t3 = Box::new(s3);
-        let t4 = Cons(y, t3);
+        let t4 = Pair::Cons(y, t3);
         let v = Exp::List(t4);
         let f2 = Box::new(v);
         // represent (define (square x) (* x x))
-        let t5 = Cons(f3, d3);
+        let t5 = Pair::Cons(f3, d3);
         let t6 = Box::new(t5);
-        let t7 = Cons(f2, t6);
+        let t7 = Pair::Cons(f2, t6);
         let t8 = Box::new(t7);
-        let t9 = Cons(f1, t8);
+        let t9 = Pair::Cons(f1, t8);
         let exp = Exp::List(t9);
         let tag1 = "define";
         assert_eq!(is_tagged_list(exp.clone(), tag1), true);
@@ -509,7 +512,35 @@ mod tests {
     }
 
     #[test]
-    fn test_is_if() {
+    fn test_if() {
+        let data = generate_test_data();
+        let if_exp = data.if_expression;
+        assert_eq!(is_if(if_exp.clone()), true);
+        
+        let s1 = Exp::Symbol("if");
+        let s2 = Exp::Symbol("n");
+        let s3 = Exp::Integer(1);
+        let s4 = Exp::Symbol("-");
+        let s5 = Exp::Symbol("=");
+        let x1 = scheme_list!(s5, s2.clone(), s3.clone());
+        let x2 = scheme_list!(s4, s2.clone(), s3.clone());
+        assert_eq!(if_predicate(if_exp.clone()), x1);
+        assert_eq!(if_consequent(if_exp.clone()), s3);
+        assert_eq!(if_alternative(if_exp.clone()), x2);
+        assert_eq!(make_if(if_predicate(if_exp.clone()), if_consequent(if_exp.clone()),
+                   if_alternative(if_exp.clone())), if_exp);
+    }
+
+    #[test]
+    fn test_begin() {
+        let t1 = Exp::Integer(5);
+        let t2 = Exp::Integer(1);
+        let t3 = Exp::Symbol("set!");
+        let t4 = Exp::Symbol("begin");
+        let t5 = Exp::Symbol("x");
+        let t6 = Exp::Symbol("+");
+        let y1 = scheme_list!(t3, t5.clone(), t1);
+        let y2 = scheme_list!(t6, t5.clone(), t2);
 
     }
 }
