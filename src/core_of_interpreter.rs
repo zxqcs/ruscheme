@@ -100,14 +100,10 @@ pub mod core_of_interpreter {
         }
     }
 
-    struct Env {}
-
-    struct Procedure {}
-
     /* core function of the Scheme interpreter */
     #[allow(dead_code)]
-    fn eval(exp: Exp, env: Env) -> Result<Exp, &'static str> {Ok(exp)}
+    fn eval(exp: Exp, env: Exp) -> Result<Exp, &'static str> {Ok(exp)}
 
     #[allow(dead_code)]
-    fn apply(p: Procedure, args: Exp) -> Result<Exp, &'static str> {Ok(args)}
+    fn apply(p: Exp, args: Exp) -> Result<Exp, &'static str> {Ok(args)}
 }

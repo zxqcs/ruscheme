@@ -3,10 +3,12 @@ mod represent;
 mod parser;
 mod display;
 mod tool;
+mod environment;
 use display::display::pretty_print;
 use core_of_interpreter::core_of_interpreter::{Exp, Pair};
 use tool::tools::{scheme_cons, append, generate_test_data};
 use represent::represent::*;
+
 #[macro_export]
 macro_rules! scheme_list {
     ( $( $x:expr ),* ) => {
