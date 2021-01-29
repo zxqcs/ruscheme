@@ -533,14 +533,58 @@ mod tests {
 
     #[test]
     fn test_begin() {
+        let data = generate_test_data();
+        //  (begin (set! x 5) (+ x 1))
+        let begin_exp = data.begin_expression;
         let t1 = Exp::Integer(5);
         let t2 = Exp::Integer(1);
         let t3 = Exp::Symbol("set!");
         let t4 = Exp::Symbol("begin");
         let t5 = Exp::Symbol("x");
         let t6 = Exp::Symbol("+");
+        // (set! x 5) 
         let y1 = scheme_list!(t3, t5.clone(), t1);
+        // (+ x 1)
         let y2 = scheme_list!(t6, t5.clone(), t2);
 
+        assert_eq!(is_begin(begin_exp.clone()), true);
+        assert_eq!(begin_actions(begin_exp.clone()), scheme_list!(y1.clone(), y2.clone()));
+        assert_eq!(is_last_exp(begin_exp.clone()), false);
+        assert_eq!(first_exp(scheme_list!(y1.clone(), y2.clone())), y1.clone());
+        assert_eq!(rest_exps(scheme_list!(y1.clone(), y2.clone())), scheme_list!(y2.clone()));
+        assert_eq!(sequence_to_exp(scheme_list!(y1.clone(), y2.clone())), begin_exp.clone());
+    }
+
+    #[test]
+    fn test_application() {
+        let data = generate_test_data();
+        let app_exp = data.applicatioin_expressioin;
+        let p1 = Exp::Symbol("procedure");
+        let p2 = Exp::Integer(3);
+        let p3 = Exp::Integer(4);
+        assert_eq!(is_application(app_exp.clone()), true);
+        assert_eq!(operator(app_exp.clone()), p1.clone());
+        assert_eq!(operands(app_exp.clone()), scheme_list!(p2.clone(), p3.clone()));
+        assert_eq!(first_operand(operands(app_exp.clone()).clone()), p2.clone());
+        assert_eq!(rest_operands(operands(app_exp.clone())), scheme_list!(p3));
+    }
+
+    #[test]
+    fn test_lambda() {
+        let data = generate_test_data();
+        let lambda_exp = data.lambda_expression;
+
+        // (lambda (x) (* x x))
+        let r1 = Exp::Symbol("lambda");
+        let r2 = Exp::Symbol("x");
+        let r3 = Exp::Symbol("*");
+
+        let parameters = scheme_list!(r2.clone());
+        let body = scheme_list!(scheme_list!(r3, r2.clone(), r2.clone()));
+        
+        assert_eq!(is_lambda(lambda_exp.clone()), true);
+        assert_eq!(lambda_parameters(lambda_exp.clone()), parameters.clone());
+        assert_eq!(lambda_body(lambda_exp.clone()), body);
+        assert_eq!(make_lambda(parameters, body), lambda_exp.clone());
     }
 }
