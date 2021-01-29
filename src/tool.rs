@@ -34,7 +34,23 @@ use crate::represent::represent::{car, cdr};
         }
     }
 
+#[allow(dead_code)]
+    pub fn set_car(x: Exp, y: Exp) -> Result<Exp, &'static str> {
+        if let Exp::List(Pair::Cons(lhs, rhs)) = x {
+            Ok(Exp::List(Pair::Cons(Box::new(y), rhs)))
+        } else {
+            Err( "error happens!")
+        }
+    }
 
+#[allow(dead_code)]
+    pub fn set_cdr(x: Exp, y: Exp) -> Result<Exp, &'static str> {
+        if let Exp::List(Pair::Cons(lhs, rhs)) = x {
+            Ok(scheme_cons(*lhs, scheme_list!(y)))
+        } else {
+            Err("error happens!")
+        }
+    }
 
 #[derive(Debug, Clone)] 
     pub struct TestData{
@@ -94,8 +110,8 @@ use crate::represent::represent::{car, cdr};
 }
 #[cfg(test)]
 mod test {
-    use super::tools::{scheme_cons, append};
-    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair::*};
+    use super::tools::{scheme_cons, append, set_car, set_cdr};
+    use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, scheme_list};
     use crate::represent::represent::{cadr, cddr, caadr};
     #[test]
     fn test_scheme_cons() {
@@ -105,7 +121,7 @@ mod test {
     // lambda body: ((+ x x))
         let plus = Exp::Symbol("+");
         let x = Exp::Symbol("x");
-        let null = Exp::List(Nil);
+        let null = Exp::List(Pair::Nil);
         //  parameters: (x)
         let parameters = scheme_cons(x.clone(), null.clone());
         // (x)
@@ -125,7 +141,7 @@ mod test {
 
     #[test]
     fn test_append() {
-        let null = Exp::List(Nil);
+        let null = Exp::List(Pair::Nil);
         let n1 = Exp::Integer(1);
         let n2 = Exp::Integer(2);
         let n3 = Exp::Integer(3);
@@ -134,5 +150,28 @@ mod test {
         let s3 = scheme_cons(n1.clone(), 
                    scheme_cons(n2.clone(), n3.clone()));
         assert_eq!(s3, append(s2, s1));
+    }
+
+    #[test]
+    fn test_set_cdr() {
+        // ("hello" "world")  -> ("hello" "fool")
+        let hello = Exp::Symbol("hello");
+        let world = Exp::Symbol("world");
+        
+        let fool = Exp::Symbol("fool");
+        let s1 = scheme_list!(hello.clone(), world);
+        let s2 = scheme_list!(hello.clone(), fool.clone());
+        assert_eq!(s2, set_cdr(s1, fool).unwrap());
+    }
+
+    #[test]
+    fn test_set_car() {
+        let hello = Exp::Symbol("hello");
+        let world = Exp::Symbol("world");
+        let fool = Exp::Symbol("fool");
+         
+        let s1 = scheme_list!(hello.clone(), world.clone());
+        let s2 = scheme_list!(fool.clone(), world.clone());
+        assert_eq!(s2, set_car(s1, fool).unwrap());
     }
 }
