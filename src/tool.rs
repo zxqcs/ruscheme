@@ -46,7 +46,7 @@ use crate::represent::represent::{car, cdr};
 #[allow(dead_code)]
     pub fn set_cdr(x: Exp, y: Exp) -> Result<Exp, &'static str> {
         if let Exp::List(Pair::Cons(lhs, rhs)) = x {
-            Ok(scheme_cons(*lhs, scheme_list!(y)))
+            Ok(scheme_cons(*lhs, y))
         } else {
             Err("error happens!")
         }
@@ -107,6 +107,42 @@ use crate::represent::represent::{car, cdr};
         data
     }
 
+    pub struct Frames {
+        pub variables: Exp,
+        pub values: Exp,
+        pub frame: Exp,
+        pub extended_frame: Exp,
+    }
+
+    impl Frames {
+        fn new(variables: Exp, values: Exp, frame: Exp, extended_frame:Exp) -> Self{
+            Frames {
+                variables: variables,
+                values: values,
+                frame: frame,
+                extended_frame: extended_frame,
+            }
+        }
+    }
+
+    pub fn generate_test_frames() -> Frames {
+        let x = Exp::Symbol("x");
+        let y = Exp::Symbol("y");
+        let z = Exp::Symbol("z");
+        let one = Exp::Integer(1);
+        let two = Exp::Integer(2);
+        let three = Exp::Integer(3);
+        let a = Exp::Symbol("a");
+        let four = Exp::Integer(4);
+        let variables = scheme_list!(x.clone(), y.clone(), z.clone());
+        let values = scheme_list!(one.clone(), two.clone(), 
+                                                   three.clone());
+        let extended_variables = scheme_list!(a, x, y, z);
+        let extended_values = scheme_list!(four, one.clone(), two.clone(), three.clone());
+        let frame = scheme_cons(variables.clone(), scheme_list!(one, two, three));
+        let extended_frame= scheme_cons(extended_variables, extended_values);
+        Frames::new(variables, values, frame, extended_frame)
+    }
 }
 #[cfg(test)]
 mod test {
