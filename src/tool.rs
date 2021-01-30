@@ -51,6 +51,15 @@ use crate::represent::represent::{car, cdr};
             Err("error happens!")
         }
     }
+#[allow(dead_code)]
+    pub fn list_length(exp: Exp) -> i32 {
+        if exp == Exp::List(Pair::Nil) {
+            0
+        } else {
+            1 + list_length(cdr(exp.clone()).unwrap())
+        }
+    }
+    
 
 #[derive(Debug, Clone)] 
     pub struct TestData{
@@ -146,7 +155,7 @@ use crate::represent::represent::{car, cdr};
 }
 #[cfg(test)]
 mod test {
-    use super::tools::{scheme_cons, append, set_car, set_cdr};
+    use super::tools::{append, list_length, scheme_cons, set_car, set_cdr};
     use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, scheme_list};
     use crate::represent::represent::{cadr, cddr, caadr};
     #[test]
@@ -209,5 +218,15 @@ mod test {
         let s1 = scheme_list!(hello.clone(), world.clone());
         let s2 = scheme_list!(fool.clone(), world.clone());
         assert_eq!(s2, set_car(s1, fool).unwrap());
+    }
+
+    #[test]
+    fn test_list_length() {
+        let s1 = scheme_list!(Exp::Integer(1));
+        let s2 = scheme_list!(Exp::Integer(2), Exp::Integer(3));
+        let s3 = scheme_list!(Exp::Integer(4), Exp::Integer(5));
+        let s = scheme_list!(s1, s2, s3);
+        assert_eq!(list_length(s), 3);
+        assert_eq!(list_length(Exp::List(Pair::Nil)), 0);
     }
 }

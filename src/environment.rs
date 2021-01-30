@@ -1,9 +1,12 @@
 
 pub mod env {
-    use crate::represent::represent::*;
-    use crate::core_of_interpreter::core_of_interpreter::{Exp};
+    use crate::{represent::represent::*, scheme_list, tool::tools::list_length};
+    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
     use crate::tool::tools::{scheme_cons, set_cdr, set_car};
 
+    const THE_EMPTY_ENVIRONMENT: Exp = Exp::List(Pair::Nil);
+
+    // frame operatons
     #[allow(dead_code)]
     pub fn make_frame(variables: Exp, values: Exp) -> Exp {
         scheme_cons(variables, values) 
@@ -25,6 +28,39 @@ pub mod env {
             scheme_cons(var, frame_variables(frame.clone()))).unwrap();
         set_cdr(temp, scheme_cons(val, frame_values(frame.clone()))).unwrap()
     }
+
+    // environment operatons
+    #[allow(dead_code)]
+    pub fn extend_environment(vars: Exp, vals: Exp, base_env: Exp) -> Result<Exp, &'static str> {
+        if list_length(vars.clone()) == list_length(vals.clone()) {
+            Ok(scheme_cons(make_frame(vars, vals), 
+                    base_env))
+        } else {
+            Err("number of args mismatch!")
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn enclosing_environment(env: Exp) -> Exp { 
+        cdr(env).unwrap()
+    }
+
+    #[allow(dead_code)]
+    pub fn first_frame(env: Exp) -> Exp {
+        car(env).unwrap()
+    }
+
+    #[allow(dead_code)]
+    pub fn lookup_varaible_value(var: Exp, env: Exp) -> Exp {
+        Exp::Integer(0)
+    }
+
+    #[allow(dead_code)]
+    pub fn set_variable_value(var: Exp, val: Exp, env: Exp) {}
+
+    #[allow(dead_code)]
+    pub fn define_variable(var: Exp, val: Exp, env: Exp) {}
+
 }
 
 #[cfg(test)]
