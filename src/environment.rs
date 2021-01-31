@@ -51,8 +51,33 @@ pub mod env {
     }
 
     #[allow(dead_code)]
+    fn scan(vars: Exp, vals: Exp, target: Exp) -> Option<Exp> {
+        let null = Exp::List(Pair::Nil);
+        if vars == null {
+            None
+        } else if target == car(vars.clone()).unwrap() {
+            Some(car(vals).unwrap())
+        } else {
+            scan(cdr(vars.clone()).unwrap(), cdr(vals.clone()).unwrap(), target)
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn lookup_varaible_value(var: Exp, env: Exp) -> Exp {
-        Exp::Integer(0)
+        if env == THE_EMPTY_ENVIRONMENT {
+            panic!("unbound variable");
+        } else {
+            let frame = first_frame(env.clone());
+            let s = scan(frame_variables(frame.clone()), 
+                                         frame_values(frame.clone()), var.clone());
+            match s {
+                Some(x) => x,
+                None => {
+                    let enclosing_environment = enclosing_environment(env);
+                    lookup_varaible_value(var, enclosing_environment)
+                },
+            }
+        }
     }
 
     #[allow(dead_code)]
