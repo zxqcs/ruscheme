@@ -80,8 +80,47 @@ pub mod env {
         }
     }
 
+
     #[allow(dead_code)]
-    pub fn set_variable_value(var: Exp, val: Exp, env: Exp) {}
+    fn scan_and_set(vars: Exp, vals: Exp, target: Exp, target_val: Exp) -> Option<Exp> {
+        let null = Exp::List(Pair::Nil);
+        if vars == null {
+            None
+        } else if target == car(vars.clone()).unwrap() {
+            Some(set_car(vals, target_val).unwrap())
+        } else {
+            let temp_vals = scan_and_set(cdr(vars.clone()).unwrap(), cdr(vals.clone()).unwrap(), target, target_val);
+            if temp_vals != None {
+                Some(set_cdr(vals, temp_vals.unwrap()).unwrap())
+            } else {
+                Some(vals)
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn set_variable_value(var: Exp, val: Exp, env: Exp) -> Option<Exp> {
+        if env == THE_EMPTY_ENVIRONMENT {
+            panic!("unbound variable: SET!");
+        } else {
+            let frame = first_frame(env.clone());
+            let s = scan_and_set(frame_variables(frame.clone()), 
+                                            frame_values(frame.clone()), 
+                                           var.clone(),
+                                        val.clone());
+            match s {
+                Some(x) => {
+                    let temp_frame = set_cdr(frame, x).unwrap();
+                    Some(set_car(env, temp_frame).unwrap())
+                },
+                None => {
+                    let enclosing_env = enclosing_environment(env.clone());
+                    let temp_env = set_variable_value(var, val,  enclosing_env).unwrap();
+                    Some(set_cdr(env, temp_env).unwrap())
+                },
+            }
+        }
+    }
 
     #[allow(dead_code)]
     pub fn define_variable(var: Exp, val: Exp, env: Exp) {}
