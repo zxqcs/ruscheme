@@ -63,7 +63,7 @@ pub mod env {
     }
 
     #[allow(dead_code)]
-    pub fn lookup_varaible_value(var: Exp, env: Exp) -> Exp {
+    pub fn lookup_variable_value(var: Exp, env: Exp) -> Exp {
         if env == THE_EMPTY_ENVIRONMENT {
             panic!("unbound variable");
         } else {
@@ -74,7 +74,7 @@ pub mod env {
                 Some(x) => x,
                 None => {
                     let enclosing_environment = enclosing_environment(env);
-                    lookup_varaible_value(var, enclosing_environment)
+                    lookup_variable_value(var, enclosing_environment)
                 },
             }
         }
@@ -82,42 +82,39 @@ pub mod env {
 
 
     #[allow(dead_code)]
-    fn scan_and_set(vars: Exp, vals: Exp, target: Exp, target_val: Exp) -> Option<Exp> {
+    pub fn scan_and_set(vars: Exp, vals: Exp, target_var: Exp, target_val: Exp, tag: &mut bool) -> Exp {
         let null = Exp::List(Pair::Nil);
         if vars == null {
-            None
-        } else if target == car(vars.clone()).unwrap() {
-            Some(set_car(vals, target_val).unwrap())
+            null
+        } else if target_var == car(vars.clone()).unwrap() {
+            *tag = true;
+            set_car(vals, target_val).unwrap()
         } else {
-            let temp_vals = scan_and_set(cdr(vars.clone()).unwrap(), cdr(vals.clone()).unwrap(), target, target_val);
-            if temp_vals != None {
-                Some(set_cdr(vals, temp_vals.unwrap()).unwrap())
-            } else {
-                Some(vals)
-            }
+            let temp_vals = scan_and_set(cdr(vars.clone()).unwrap(), 
+                           cdr(vals.clone()).unwrap(), target_var, target_val, tag);
+            set_cdr(vals, temp_vals).unwrap()
         }
     }
 
     #[allow(dead_code)]
-    pub fn set_variable_value(var: Exp, val: Exp, env: Exp) -> Option<Exp> {
+    pub fn set_variable_value(var: Exp, val: Exp, env: Exp) -> Exp {
         if env == THE_EMPTY_ENVIRONMENT {
             panic!("unbound variable: SET!");
         } else {
+            let mut tag = false;
             let frame = first_frame(env.clone());
             let s = scan_and_set(frame_variables(frame.clone()), 
                                             frame_values(frame.clone()), 
-                                           var.clone(),
-                                        val.clone());
-            match s {
-                Some(x) => {
-                    let temp_frame = set_cdr(frame, x).unwrap();
-                    Some(set_car(env, temp_frame).unwrap())
-                },
-                None => {
-                    let enclosing_env = enclosing_environment(env.clone());
-                    let temp_env = set_variable_value(var, val,  enclosing_env).unwrap();
-                    Some(set_cdr(env, temp_env).unwrap())
-                },
+                                       var.clone(),
+                                       val.clone(),
+                                                 &mut tag);
+            if tag {
+                let temp_frame = set_cdr(frame, s).unwrap();
+                set_car(env, temp_frame).unwrap()
+            } else {
+                let enclosing_env = enclosing_environment(env.clone());
+                let temp_env = set_variable_value(var, val, enclosing_env);
+                set_cdr(env, temp_env).unwrap()
             }
         }
     }
@@ -129,10 +126,10 @@ pub mod env {
 
 #[cfg(test)]
 mod test {
-    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
+    use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, display::display::pretty_print};
     use crate::tool::tools::{append, scheme_cons, generate_test_frames};
     use crate::scheme_list;
-    use super::env::{add_binding_to_frame, frame_values, frame_variables, make_frame};
+    use super::env::{add_binding_to_frame, frame_values, frame_variables, lookup_variable_value, make_frame, scan_and_set, set_variable_value};
 
 
     #[test]
@@ -160,5 +157,39 @@ mod test {
         let data = generate_test_frames();
         let s = add_binding_to_frame(a, four, data.frame);
         assert_eq!(s, data.extended_frame); 
+    }
+
+    #[test]
+    fn test_lookup_variable_value() {
+        let frame_one = generate_test_frames().frame;
+        let u = Exp::Symbol("u");
+        let v = Exp::Symbol("v");
+        let four = Exp::Integer(4);
+        let five = Exp::Integer(5);
+        let frame_two = scheme_list!(scheme_list!(u, v), four, five);
+        let test_env = scheme_list!(frame_one, frame_two);
+        assert_eq!(lookup_variable_value(Exp::Symbol("u"), test_env.clone()), Exp::Integer(4));
+        assert_eq!(lookup_variable_value(Exp::Symbol("v"), test_env.clone()), Exp::Integer(5));
+        assert_eq!(lookup_variable_value(Exp::Symbol("z"), test_env.clone()), Exp::Integer(3));
+        assert_eq!(lookup_variable_value(Exp::Symbol("x"), test_env), Exp::Integer(1));
+    }
+    #[test]
+    fn test_set_variable_value() {
+        let frame_one = generate_test_frames().frame;
+        let u = Exp::Symbol("u");
+        let v = Exp::Symbol("v");
+        let four = Exp::Integer(4);
+        let five = Exp::Integer(5);
+        let frame_two = scheme_list!(scheme_list!(u, v), four, five);
+        let test_env = scheme_list!(frame_one, frame_two);
+        let modified_env = set_variable_value(Exp::Symbol("v"),
+                                                        Exp::Integer(0),  
+                                                            test_env.clone());
+        let another_env = set_variable_value(Exp::Symbol("u"), 
+                                                     Exp::Integer(9), modified_env.clone());
+        let one_more_env = set_variable_value(Exp::Symbol("z"), Exp::Integer(1000), another_env.clone());
+        assert_eq!(lookup_variable_value(Exp::Symbol("v"), modified_env), Exp::Integer(0));
+        assert_eq!(lookup_variable_value(Exp::Symbol("u"), another_env), Exp::Integer(9));
+        assert_eq!(lookup_variable_value(Exp::Symbol("z"), one_more_env.clone()), Exp::Integer(1000));
     }
 }
