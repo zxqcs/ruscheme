@@ -10,6 +10,7 @@ pub mod display {
             Exp::Symbol(x) => print!("{}", x),
             Exp::Quote(x) => print!("{}", x),
             Exp::SchemeString(x) => print!("{}", x),
+            Exp::Bool(x) => print!("{}", x),
             Exp::List(Pair::Cons(x, y)) => {
                 print!("(");
                 print(*x);

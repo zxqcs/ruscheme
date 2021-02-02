@@ -234,6 +234,11 @@ pub mod  represent{
 
 /* note that cond related procedures are ommited */
 /* operations on List variant of Exp */
+    #[allow(dead_code)]
+    pub fn is_null(exp: &Exp) -> bool {
+        *exp == Exp::List(Pair::Nil)
+    }
+
     pub fn car(exp: Exp) -> Result<Exp, &'static str> {
         match &exp {
             Exp::List(_x) => {

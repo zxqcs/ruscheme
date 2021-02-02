@@ -152,10 +152,10 @@ pub mod env {
 
 #[cfg(test)]
 mod test {
-    use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, display::display::pretty_print};
+    use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}};
     use crate::tool::tools::{append, scheme_cons, generate_test_frames};
     use crate::scheme_list;
-    use super::env::{add_binding_to_frame, define_variable, frame_values, frame_variables, lookup_variable_value, make_frame, scan_and_set, set_variable_value};
+    use super::env::{add_binding_to_frame, define_variable, frame_values, frame_variables, lookup_variable_value, make_frame, set_variable_value};
 
 
     #[test]
