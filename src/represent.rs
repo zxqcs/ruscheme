@@ -1,8 +1,8 @@
 
 #![allow(unused_variables)]
 pub mod  represent{
-    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
-    use crate::tool::tools::{scheme_cons};
+    use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, scheme_list};
+    use crate::tool::tools::{scheme_cons, append};
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
     impl Exp {
@@ -193,12 +193,36 @@ pub mod  represent{
                 make_begin(seq)
             }
         }
-        // to be implemented later
+
         #[allow(dead_code)]
         pub fn make_begin(seq: Exp) -> Exp {
             scheme_cons(Exp::Symbol("begin"), seq)
         }
+        // representing procedures
+        #[allow(dead_code)]
+        pub fn make_procedure(parameters: Exp, body: Exp, env: Exp) -> Exp {
+            scheme_list!(Exp::Symbol("procedure"), parameters, body, env)
+        }
 
+        #[allow(dead_code)]
+        pub fn is_compound_procedure(p: Exp) -> bool {
+            is_tagged_list(p, "procedure")
+        }
+
+        #[allow(dead_code)]
+        pub fn procedure_parameters(p: Exp) -> Exp {
+            cadr(p).unwrap()
+        }
+
+        #[allow(dead_code)]
+        pub fn procedure_body(p: Exp) -> Exp {
+            caddr(p).unwrap()
+        }
+
+        #[allow(dead_code)]
+        pub fn procedure_environment(p: Exp) -> Exp {
+            cadddr(p).unwrap()
+        }
         // A procedure application is any compound expression that is 
         // not one of the above expression types
         #[allow(dead_code)]
@@ -231,7 +255,7 @@ pub mod  represent{
         pub fn rest_operands(ops: Exp) -> Exp {
             cdr(ops).unwrap()
         }
-
+        
 /* note that cond related procedures are ommited */
 /* operations on List variant of Exp */
     #[allow(dead_code)]
@@ -347,7 +371,7 @@ pub mod  represent{
 }
 #[cfg(test)]
 mod tests {
-    use crate::scheme_list;
+    use crate::{scheme_list, tool::tools::generate_test_frames};
     use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
     use super::represent::*;
     use crate::tool::tools::{append, scheme_cons, generate_test_data };
@@ -591,5 +615,24 @@ mod tests {
         assert_eq!(lambda_parameters(lambda_exp.clone()), parameters.clone());
         assert_eq!(lambda_body(lambda_exp.clone()), body);
         assert_eq!(make_lambda(parameters, body), lambda_exp.clone());
+    }
+
+    #[test]
+    fn test_procedure() {
+        // primitive procedure: ('primitive +)
+        // compound procedure: ('primitive (x y) (+ x y) env))
+        // env:  (((x y z) 1 2 3) ((u v) 4 5))
+        let frame = generate_test_frames().frame;
+        let env = scheme_list!(frame);
+        let parameters = scheme_list!(Exp::Symbol("x"), Exp::Symbol("y"));
+        let body = scheme_list!(Exp::Symbol("+"), Exp::Symbol("x"), Exp::Symbol("y"));
+        let procedure = scheme_list!(Exp::Symbol("procedure"), 
+                                         parameters.clone(),
+                                         body.clone(),
+                                         env.clone());
+        assert_eq!(is_compound_procedure(procedure.clone()), true);
+        assert_eq!(procedure_parameters(procedure.clone()), parameters);
+        assert_eq!(procedure_body(procedure.clone()), body);
+        assert_eq!(procedure_environment(procedure.clone()), env);
     }
 }

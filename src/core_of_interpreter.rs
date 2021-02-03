@@ -1,7 +1,9 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{represent::represent::{assignment_variable, definition_value, definition_variable, if_alternative, if_consequent, if_predicate, }, tool::tools::scheme_cons};
+    use crate::{represent::represent::{assignment_variable, definition_value, definition_variable, 
+        if_alternative, if_consequent, if_predicate, is_assignment, is_definiton, is_lambda, is_if},
+         tool::tools::scheme_cons};
     use crate::represent::represent::{no_operands, first_operand,rest_operands};
     use crate::environment::env::*;
 
@@ -117,7 +119,24 @@ pub mod core_of_interpreter {
 
     /* core function of the Scheme interpreter */
     #[allow(dead_code)]
-    fn eval(exp: Exp, env: Exp) -> Result<Exp, &'static str> {Ok(exp)}
+    fn eval(exp: Exp, env: Exp) -> Result<Exp, &'static str> {
+        if exp.is_self_evaluating() {
+            Ok(exp)
+        } else if exp.is_variable(){
+            Ok(lookup_variable_value(exp, env))
+        } else if exp.is_quoted() {
+            Ok(exp)
+        } else if is_assignment(exp.clone()) {
+            Ok(eval_assignment(exp, env))
+        } else if is_definiton(exp.clone()) {
+            let temp_env = eval_definition(exp, env);
+            Ok(Exp::SchemeString("Ok"))
+        } else if is_if(exp.clone()) {
+            Ok(eval_if(exp, env))
+        } else {
+            Ok(Exp::List(Pair::Nil))
+        }
+    }
 
     #[allow(dead_code)]
     fn list_of_values(exps: Exp, env: Exp) -> Exp {
