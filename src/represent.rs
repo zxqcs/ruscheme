@@ -198,6 +198,7 @@ pub mod  represent{
         pub fn make_begin(seq: Exp) -> Exp {
             scheme_cons(Exp::Symbol("begin"), seq)
         }
+        
         // representing procedures
         #[allow(dead_code)]
         pub fn make_procedure(parameters: Exp, body: Exp, env: Exp) -> Exp {

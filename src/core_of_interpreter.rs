@@ -1,9 +1,7 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{represent::represent::{assignment_variable, definition_value, definition_variable, 
-        if_alternative, if_consequent, if_predicate, is_assignment, is_definiton, is_lambda, is_if},
-         tool::tools::scheme_cons};
+    use crate::{represent::represent::{assignment_variable, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_assignment, is_definiton, is_if, is_lambda, is_last_exp}, tool::tools::scheme_cons};
     use crate::represent::represent::{no_operands, first_operand,rest_operands};
     use crate::environment::env::*;
 
@@ -35,6 +33,14 @@ pub mod core_of_interpreter {
         }
     }
 
+    #[allow(dead_code)]
+    #[derive(Debug, Clone)]
+    pub struct Env(pub Exp); 
+    impl Env {
+        fn new() -> Self {
+            Env(Exp::List(Pair::Nil))
+        }
+    }
     /* everything is an Exp to be interpreted */
     #[allow(dead_code)]
     #[derive(Debug, Clone)]
@@ -119,7 +125,7 @@ pub mod core_of_interpreter {
 
     /* core function of the Scheme interpreter */
     #[allow(dead_code)]
-    fn eval(exp: Exp, env: Exp) -> Result<Exp, &'static str> {
+    fn eval(exp: Exp, env: Env) -> Result<Exp, &'static str> {
         if exp.is_self_evaluating() {
             Ok(exp)
         } else if exp.is_variable(){
@@ -139,7 +145,7 @@ pub mod core_of_interpreter {
     }
 
     #[allow(dead_code)]
-    fn list_of_values(exps: Exp, env: Exp) -> Exp {
+    fn list_of_values(exps: Exp, env: Env) -> Exp {
         if no_operands(exps.clone()) {
             Exp::List(Pair::Nil)
         } else {
@@ -149,7 +155,7 @@ pub mod core_of_interpreter {
     }
 
     #[allow(dead_code)]
-    fn eval_if(exp: Exp, env: Exp) -> Exp {
+    fn eval_if(exp: Exp, env: Env) -> Exp {
         if eval(if_predicate(exp.clone()), env.clone()).unwrap() == Exp::Bool(true) {
             eval(if_consequent(exp), env).unwrap()
         } else {
@@ -158,23 +164,29 @@ pub mod core_of_interpreter {
     }    
 
     #[allow(dead_code)]
-    fn eval_assignment(exp: Exp, env: Exp) -> Exp {
-        set_variable_value(assignment_variable(exp.clone()), 
-        eval(definition_value(exp), env.clone()).unwrap(), env)
+    fn eval_assignment(exp: Exp, env: Env) -> Exp {
+        let temp = set_variable_value(assignment_variable(exp.clone()), 
+        eval(definition_value(exp), env.clone()).unwrap(), env);
+        temp.0
     }
 
     #[allow(dead_code)]
-    fn eval_definition(exp: Exp, env: Exp) -> Exp {
-        define_variable(definition_variable(exp.clone()), 
+    fn eval_definition(exp: Exp, env: Env) -> Exp {
+        let temp = define_variable(definition_variable(exp.clone()), 
                        eval(definition_value(exp), env.clone()).unwrap(), 
-                                 env)
+                                 env);
+        temp.0
     }
-    // to be implemented later
+/*    // to be implemented later
     #[allow(dead_code)]
     fn eval_sequence(exps: Exp, env: Exp) -> Exp {
-        Exp::List(Pair::Nil)
-    }
+        if is_last_exp(exps.clone()) {
+            eval(first_exp(exps), env).unwrap()
+        } else {
 
+        }
+    }
+*/
     #[allow(dead_code)]
     fn apply(p: Exp, args: Exp) -> Result<Exp, &'static str> {Ok(args)}
 }

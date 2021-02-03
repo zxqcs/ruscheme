@@ -1,7 +1,7 @@
 
 pub mod env {
     use crate::{represent::represent::*, scheme_list, tool::tools::{list_length, append}};
-    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
+    use crate::core_of_interpreter::core_of_interpreter::{Env, Exp, Pair};
     use crate::tool::tools::{scheme_cons, set_cdr, set_car};
 
     const THE_EMPTY_ENVIRONMENT: Exp = Exp::List(Pair::Nil);
@@ -31,23 +31,24 @@ pub mod env {
 
     // environment operatons
     #[allow(dead_code)]
-    pub fn extend_environment(vars: Exp, vals: Exp, base_env: Exp) -> Result<Exp, &'static str> {
+    pub fn extend_environment(vars: Exp, vals: Exp, base_env: Env) -> Result<Env, &'static str> {
         if list_length(vars.clone()) == list_length(vals.clone()) {
-            Ok(scheme_cons(make_frame(vars, vals), 
-                    base_env))
+            let env = scheme_cons(make_frame(vars, vals), 
+                    base_env.0);
+            Ok(Env(env))
         } else {
             Err("number of args mismatch!")
         }
     }
 
     #[allow(dead_code)]
-    pub fn enclosing_environment(env: Exp) -> Exp { 
-        cdr(env).unwrap()
+    pub fn enclosing_environment(env: Env) -> Env { 
+        Env(cdr(env.0).unwrap())
     }
 
     #[allow(dead_code)]
-    pub fn first_frame(env: Exp) -> Exp {
-        car(env).unwrap()
+    pub fn first_frame(env: Env) -> Exp {
+        car(env.0).unwrap()
     }
 
     #[allow(dead_code)]
@@ -63,8 +64,8 @@ pub mod env {
     }
 
     #[allow(dead_code)]
-    pub fn lookup_variable_value(var: Exp, env: Exp) -> Exp {
-        if env == THE_EMPTY_ENVIRONMENT {
+    pub fn lookup_variable_value(var: Exp, env: Env) -> Exp {
+        if env.0 == THE_EMPTY_ENVIRONMENT {
             panic!("unbound variable");
         } else {
             let frame = first_frame(env.clone());
@@ -96,8 +97,8 @@ pub mod env {
     }
 
     #[allow(dead_code)]
-    pub fn set_variable_value(var: Exp, val: Exp, env: Exp) -> Exp {
-        if env == THE_EMPTY_ENVIRONMENT {
+    pub fn set_variable_value(var: Exp, val: Exp, env: Env) -> Env {
+        if env.0 == THE_EMPTY_ENVIRONMENT {
             panic!("unbound variable: SET!");
         } else {
             let mut tag = false;
@@ -109,11 +110,11 @@ pub mod env {
                                                  &mut tag);
             if tag {
                 let temp_frame = set_cdr(frame, s).unwrap();
-                set_car(env, temp_frame).unwrap()
+                Env(set_car(env.0, temp_frame).unwrap())
             } else {
                 let enclosing_env = enclosing_environment(env.clone());
                 let temp_env = set_variable_value(var, val, enclosing_env);
-                set_cdr(env, temp_env).unwrap()
+                Env(set_cdr(env.0, temp_env.0).unwrap())
             }
         }
     }
@@ -138,21 +139,21 @@ pub mod env {
         }
 
     #[allow(dead_code)]
-    pub fn define_variable(target_var: Exp, target_val: Exp, env: Exp) -> Exp {
-        if env == Exp::List(Pair::Nil) {
+    pub fn define_variable(target_var: Exp, target_val: Exp, env: Env) -> Env {
+        if env.0 == Exp::List(Pair::Nil) {
             let frame = scheme_list!(scheme_list!(target_var), target_val);
-            scheme_list!(frame)
+            Env(scheme_list!(frame))
         } else {
             let frame = first_frame(env.clone());
             let temp_frame = scan_and_define(target_var, target_val, frame);
-            set_car(env, temp_frame).unwrap()
+            Env(set_car(env.0, temp_frame).unwrap())
         }
     } 
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}};
+    use crate::{core_of_interpreter::core_of_interpreter::{Env, Exp, Pair}};
     use crate::tool::tools::{append, scheme_cons, generate_test_frames};
     use crate::scheme_list;
     use super::env::{add_binding_to_frame, define_variable, frame_values, frame_variables, lookup_variable_value, make_frame, set_variable_value};
@@ -193,7 +194,7 @@ mod test {
         let four = Exp::Integer(4);
         let five = Exp::Integer(5);
         let frame_two = scheme_list!(scheme_list!(u, v), four, five);
-        let test_env = scheme_list!(frame_one, frame_two);
+        let test_env = Env(scheme_list!(frame_one, frame_two));
         assert_eq!(lookup_variable_value(Exp::Symbol("u"), test_env.clone()), Exp::Integer(4));
         assert_eq!(lookup_variable_value(Exp::Symbol("v"), test_env.clone()), Exp::Integer(5));
         assert_eq!(lookup_variable_value(Exp::Symbol("z"), test_env.clone()), Exp::Integer(3));
@@ -207,7 +208,7 @@ mod test {
         let four = Exp::Integer(4);
         let five = Exp::Integer(5);
         let frame_two = scheme_list!(scheme_list!(u, v), four, five);
-        let test_env = scheme_list!(frame_one, frame_two);
+        let test_env = Env(scheme_list!(frame_one, frame_two));
         let modified_env = set_variable_value(Exp::Symbol("v"),
                                                         Exp::Integer(0),  
                                                             test_env.clone());
@@ -227,7 +228,7 @@ mod test {
         let four = Exp::Integer(4);
         let five = Exp::Integer(5);
         let frame_two = scheme_list!(scheme_list!(u, v), four, five);
-        let mut test_env = scheme_list!(frame_one, frame_two);
+        let mut test_env = Env(scheme_list!(frame_one, frame_two));
         test_env = define_variable(Exp::Symbol("x"), Exp::Integer(0), test_env);
         assert_eq!(lookup_variable_value(Exp::Symbol("x"), test_env.clone()), Exp::Integer(0));
         test_env = define_variable(Exp::Symbol("s"), Exp::Integer(101), test_env);
@@ -235,7 +236,7 @@ mod test {
         test_env = define_variable(Exp::Symbol("y"), Exp::Integer(333), test_env);
         assert_eq!(lookup_variable_value(Exp::Symbol("y"), test_env.clone()), Exp::Integer(333));
         let mut another_env = define_variable(Exp::Symbol("p"), Exp::Integer(100), 
-                                         Exp::List(Pair::Nil));
+                                         Env(Exp::List(Pair::Nil)));
         assert_eq!(lookup_variable_value(Exp::Symbol("p"), another_env.clone()), Exp::Integer(100));
         another_env = define_variable(Exp::Symbol("d"), Exp::Integer(27), another_env.clone());
         assert_eq!(lookup_variable_value(Exp::Symbol("d"), another_env.clone()), Exp::Integer(27));
