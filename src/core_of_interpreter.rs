@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{represent::represent::{assignment_variable, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_assignment, is_definiton, is_if, is_lambda, is_last_exp}, tool::tools::scheme_cons};
+    use crate::{represent::represent::{assignment_variable, begin_actions, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body, procedure_environment, procedure_parameters, rest_exps}, tool::tools::scheme_cons};
     use crate::represent::represent::{no_operands, first_operand,rest_operands};
     use crate::environment::env::*;
 
@@ -36,11 +36,7 @@ pub mod core_of_interpreter {
     #[allow(dead_code)]
     #[derive(Debug, Clone)]
     pub struct Env(pub Exp); 
-    impl Env {
-        fn new() -> Self {
-            Env(Exp::List(Pair::Nil))
-        }
-    }
+
     /* everything is an Exp to be interpreted */
     #[allow(dead_code)]
     #[derive(Debug, Clone)]
@@ -135,12 +131,19 @@ pub mod core_of_interpreter {
         } else if is_assignment(exp.clone()) {
             Ok(eval_assignment(exp, env))
         } else if is_definiton(exp.clone()) {
-            let temp_env = eval_definition(exp, env);
-            Ok(Exp::SchemeString("Ok"))
+            Ok(eval_definition(exp, env))
         } else if is_if(exp.clone()) {
             Ok(eval_if(exp, env))
+        } else if is_lambda(exp.clone()) {
+            Ok(make_procedure(lambda_parameters(exp.clone()), 
+                                     lambda_body(exp), env))
+        } else if is_begin(exp.clone()) {
+            Ok(eval_sequence(begin_actions(exp), env))
+        } else if is_application(exp.clone()) {
+           Ok(apply(eval(operator(exp.clone()), env.clone()).unwrap(),
+                     list_of_values(operands(exp), env)).unwrap())
         } else {
-            Ok(Exp::List(Pair::Nil))
+            Err("unknow expression, type: EVAL")
         }
     }
 
@@ -179,10 +182,29 @@ pub mod core_of_interpreter {
     }
 
     #[allow(dead_code)]
-    fn eval_sequence(exps: Exp, env: Exp) -> Exp {
-        Exp::List(Pair::Nil)
+    fn eval_sequence(exps: Exp, env: Env) -> Exp {
+        if is_last_exp(exps.clone()) {
+            eval(first_exp(exps),env).unwrap()
+        } else {
+            let temp = eval(first_exp(exps.clone()), env.clone()).unwrap();
+            eval_sequence(rest_exps(exps), env)
+        }
     }
 
     #[allow(dead_code)]
-    fn apply(p: Exp, args: Exp) -> Result<Exp, &'static str> {Ok(args)}
+    fn apply(p: Exp, args: Exp) -> Result<Exp, &'static str> {
+        if is_primitive_procedure(p.clone()) {
+            Ok(apply_primitive_procedure(p, args))
+        } else if is_compound_procedure(p.clone()) {
+            Ok(eval_sequence(procedure_body(p.clone()), extend_environment(
+                                procedure_parameters(p.clone()), args,
+                              procedure_environment(p)).unwrap()))
+        } else {
+            Err("unknow procedure type: APPLY")
+        }
+    }
+
+    fn apply_primitive_procedure(p: Exp, args: Exp) -> Exp {
+        Exp::List(Pair::Nil)
+    }
 }
