@@ -181,7 +181,7 @@ pub mod  represent{
         pub fn rest_exps(seq: Exp) -> Exp {
             cdr(seq).unwrap()
         }
-        // to be implemented later
+
         #[allow(dead_code)]
         pub fn sequence_to_exp(seq: Exp) -> Exp {
             let null = Exp::List(Pair::Nil);
@@ -198,7 +198,7 @@ pub mod  represent{
         pub fn make_begin(seq: Exp) -> Exp {
             scheme_cons(Exp::Symbol("begin"), seq)
         }
-        
+
         // representing procedures
         #[allow(dead_code)]
         pub fn make_procedure(parameters: Exp, body: Exp, env: Exp) -> Exp {

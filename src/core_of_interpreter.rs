@@ -177,16 +177,12 @@ pub mod core_of_interpreter {
                                  env);
         temp.0
     }
-/*    // to be implemented later
+
     #[allow(dead_code)]
     fn eval_sequence(exps: Exp, env: Exp) -> Exp {
-        if is_last_exp(exps.clone()) {
-            eval(first_exp(exps), env).unwrap()
-        } else {
-
-        }
+        Exp::List(Pair::Nil)
     }
-*/
+
     #[allow(dead_code)]
     fn apply(p: Exp, args: Exp) -> Result<Exp, &'static str> {Ok(args)}
 }
