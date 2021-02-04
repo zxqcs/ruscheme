@@ -123,6 +123,7 @@ use crate::represent::represent::{car, cdr};
         pub extended_frame: Exp,
     }
 
+#[allow(dead_code)]
     impl Frames {
         fn new(variables: Exp, values: Exp, frame: Exp, extended_frame:Exp) -> Self{
             Frames {
@@ -134,6 +135,7 @@ use crate::represent::represent::{car, cdr};
         }
     }
 
+#[allow(dead_code)]
     pub fn generate_test_frames() -> Frames {
         let x = Exp::Symbol("x");
         let y = Exp::Symbol("y");

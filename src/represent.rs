@@ -51,8 +51,15 @@ pub mod  represent{
             }        
         }
 
+        pub  fn is_bool(&self) -> bool {
+            match self {
+                Exp::Bool(x) => true,
+                _ => false,
+            }
+        }
+
         pub fn is_self_evaluating(&self) -> bool {
-            self.is_number() || self.is_string()
+            self.is_number() || self.is_string() || self.is_bool()
         }
     }
 

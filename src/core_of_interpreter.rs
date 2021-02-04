@@ -121,7 +121,7 @@ pub mod core_of_interpreter {
 
     /* core function of the Scheme interpreter */
     #[allow(dead_code)]
-    fn eval(exp: Exp, env: Env) -> Result<Exp, &'static str> {
+    pub fn eval(exp: Exp, env: Env) -> Result<Exp, &'static str> {
         if exp.is_self_evaluating() {
             Ok(exp)
         } else if exp.is_variable(){
