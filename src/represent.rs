@@ -18,6 +18,19 @@ pub mod  represent{
             }
         }
 
+        pub fn is_primitive_procedure(&self) -> bool {
+            if let &Exp::Symbol(x) = self {
+                match x {
+                    "*" | "/" | "+" | "-" => true,
+                    "car" => true,
+                    "cdr" => true,
+                    "cons" => true,
+                    "null?" => true,
+                    _ => false,
+                }
+            } else { false }
+        }
+
         pub fn is_variable(&self) -> bool { 
             self.is_symbol()
         }
@@ -49,6 +62,14 @@ pub mod  represent{
                 Exp::Integer(_x) => true,
                 _ => false,
             }        
+        }
+
+        pub fn to_number(&self) -> f32 {
+            match self {
+                Exp::Integer(x) => { *x as f32},
+                Exp::FloatNumber(x) => { *x },
+                _ => { panic!("not a number!"); },
+            }
         }
 
         pub  fn is_bool(&self) -> bool {

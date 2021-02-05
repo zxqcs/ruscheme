@@ -1,8 +1,8 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{represent::represent::{assignment_variable, begin_actions, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body, procedure_environment, procedure_parameters, rest_exps}, tool::tools::scheme_cons};
-    use crate::represent::represent::{no_operands, first_operand,rest_operands};
+    use crate::{represent::represent::{assignment_variable, begin_actions, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body, procedure_environment, procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
+    use crate::represent::represent::{no_operands, first_operand,rest_operands,car,cadr,cdr};
     use crate::environment::env::*;
 
     #[allow(dead_code)]
@@ -124,6 +124,8 @@ pub mod core_of_interpreter {
     pub fn eval(exp: Exp, env: Env) -> Result<Exp, &'static str> {
         if exp.is_self_evaluating() {
             Ok(exp)
+        } else if exp.is_primitive_procedure() {
+            Ok(scheme_cons(Exp::Symbol("primitive"), exp))
         } else if exp.is_variable(){
             Ok(lookup_variable_value(exp, env))
         } else if exp.is_quoted() {
@@ -205,6 +207,70 @@ pub mod core_of_interpreter {
     }
 
     fn apply_primitive_procedure(p: Exp, args: Exp) -> Exp {
-        Exp::List(Pair::Nil)
+        if let Exp::Symbol(x) = cadr(p).unwrap() {
+            match x {
+                "*" => {
+                    if list_length(args.clone()) == 2 {
+                        let lhs = car(args.clone()).unwrap();
+                        let rhs = cadr(args.clone()).unwrap();
+                        Exp::FloatNumber(lhs.to_number() * rhs.to_number())
+                    } else { panic!("wrong number of args!");}
+                },
+                "/" => {
+                    if list_length(args.clone()) == 2 {
+                        let lhs = car(args.clone()).unwrap();
+                        let rhs = cadr(args.clone()).unwrap();
+                        if rhs.to_number() == 0.0 {
+                            panic!("divide by zero!");
+                        } else {
+                            Exp::FloatNumber(lhs.to_number() / rhs.to_number())
+                        }
+                    } else { panic!("wrong number of args!"); }
+                },
+                "+" => {
+                    if list_length(args.clone()) == 2 {
+                        let lhs = car(args.clone()).unwrap();
+                        let rhs = cadr(args.clone()).unwrap();
+                        Exp::FloatNumber(lhs.to_number() + rhs.to_number())
+                    } else { panic!("wrong number of args!"); }
+                },
+                "-" => {
+                    if list_length(args.clone()) == 2 {
+                        let lhs = car(args.clone()).unwrap();
+                        let rhs = cadr(args.clone()).unwrap();
+                        Exp::FloatNumber(lhs.to_number() - rhs.to_number())
+                    } else { panic!("wrong number of args!"); }
+                },
+                "car" => {
+                    if args.is_pair() {
+                        car(args).unwrap()
+                    } else { panic!("not a proper schemem list: car"); }
+                }
+                "cdr" => {
+                    if args.is_pair() {
+                        cdr(args).unwrap()
+                    } else { panic!("not a proper schemem list: cdr"); }
+                },
+                "cons" => {
+                    if list_length(args.clone()) == 2 {
+                        let lhs = car(args.clone()).unwrap();
+                        let rhs = cadr(args.clone()).unwrap();
+                        scheme_cons(lhs, rhs)
+                    } else { panic!("not a proper schemem list: cons"); }
+                },
+                "null?" => {
+                    if list_length(args.clone()) == 1 {
+                        if car(args).unwrap() == Exp::List(Pair::Nil) {
+                            Exp::Bool(true)
+                        } else {
+                            Exp::Bool(false)
+                        }
+                    } else { panic!("not a proper schemem list: cons"); }
+                },
+                _ => { panic!("attemp to run a primitive procedure that is not implemented yet!") },
+            }
+        } else {
+            panic!("not a proper primitive procedure!");
+        }
     }
 }
