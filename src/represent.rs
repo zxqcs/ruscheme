@@ -392,12 +392,24 @@ pub mod  represent{
     }
 
     #[allow(dead_code)]
+    pub fn caar(exp: Exp) -> Result<Exp, &'static str> {
+        let s1 = car(exp).unwrap();
+        car(s1)
+    }
+
+    #[allow(dead_code)]
+    pub fn cdar(exp: Exp) -> Result<Exp, &'static str> {
+        let s1 = car(exp).unwrap();
+        cdr(s1)
+    }
+
+    #[allow(dead_code)]
     pub fn cdddr(exp: Exp) -> Result< Exp, &'static str> {
         let s1 = cdr(exp).unwrap();
         let s2 = cdr(s1).unwrap();
         cdr(s2)
     }
-    
+
     #[allow(dead_code)]
     pub fn cadddr(exp: Exp) -> Result< Exp, &'static str> {
         let s1 = cdddr(exp).unwrap();

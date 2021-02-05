@@ -1,8 +1,8 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{represent::represent::{assignment_variable, begin_actions, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body, procedure_environment, procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
-    use crate::represent::represent::{no_operands, first_operand,rest_operands,car,cadr,cdr};
+    use crate::{represent::represent::{assignment_variable, begin_actions, caar, cdar, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_number_combination, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body, procedure_environment, procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
+    use crate::represent::represent::{no_operands, first_operand,rest_operands,car,cadr};
     use crate::environment::env::*;
 
     #[allow(dead_code)]
@@ -124,6 +124,8 @@ pub mod core_of_interpreter {
     pub fn eval(exp: Exp, env: Env) -> Result<Exp, &'static str> {
         if exp.is_self_evaluating() {
             Ok(exp)
+        } else if is_number_combination(exp.clone()) {
+            Ok(exp)
         } else if exp.is_primitive_procedure() {
             Ok(scheme_cons(Exp::Symbol("primitive"), exp))
         } else if exp.is_variable(){
@@ -243,12 +245,12 @@ pub mod core_of_interpreter {
                 },
                 "car" => {
                     if args.is_pair() {
-                        car(args).unwrap()
+                        caar(args).unwrap()
                     } else { panic!("not a proper schemem list: car"); }
                 }
                 "cdr" => {
                     if args.is_pair() {
-                        cdr(args).unwrap()
+                        cdar(args).unwrap()
                     } else { panic!("not a proper schemem list: cdr"); }
                 },
                 "cons" => {
@@ -277,7 +279,7 @@ pub mod core_of_interpreter {
 
 #[cfg(test)]
 mod test {
-    use crate::environment::env::{extend_environment};  
+    use crate::{display::display::pretty_print, environment::env::{extend_environment}};  
     use crate::scheme_list;
     use crate::tool::tools::{append, scheme_cons};
     use crate::core_of_interpreter::core_of_interpreter::{Exp, Env, Pair, eval};
@@ -376,7 +378,7 @@ mod test {
                                                  Exp::Symbol("x")));
         env = Env(eval(another_definition.clone(), env.clone()).unwrap());
         let app_exp = scheme_list!(Exp::Symbol("square"), Exp::Integer(3));
-
+        // (define s ((1 2) (3 4) 5))
         let s = scheme_list!(scheme_list!(Exp::Integer(1), Exp::Integer(2)),
                                  scheme_list!(Exp::Integer(3), Exp::Integer(4)),
                                  Exp::Integer(5));
@@ -389,7 +391,33 @@ mod test {
                                                              Exp::Integer(2)));
         let cdr_exp = scheme_list!(Exp::Symbol("cdr"), Exp::Symbol("s"));
         assert_eq!(eval(cdr_exp, env.clone()).unwrap(),
-                   scheme_list!(scheme_list!(Exp::Integer(3), Exp::Integer(4)),
+                 scheme_list!(scheme_list!(Exp::Integer(3), Exp::Integer(4)),
                                 Exp::Integer(5)));
+        let null_exp = scheme_list!(Exp::Symbol("null?"), Exp::List(Pair::Nil));
+        assert_eq!(eval(null_exp.clone(), env.clone()).unwrap(), Exp::Bool(true));
+
+        let add_exp = scheme_list!(Exp::Symbol("+"), Exp::FloatNumber(3.15),
+                                                         Exp::FloatNumber(1.85));
+        assert_eq!(eval(add_exp.clone(), env.clone()).unwrap(), Exp::FloatNumber(5.0));
+
+        let substract_exp = scheme_list!(Exp::Symbol("-"), Exp::Integer(8), 
+                                                               Exp::FloatNumber(2.5));
+        assert_eq!(eval(substract_exp.clone(), env.clone()).unwrap(), Exp::FloatNumber(5.5));
+
+        let multiply_exp = scheme_list!(Exp::Symbol("*"), Exp::FloatNumber(2.5),
+                                                              Exp::FloatNumber(2.5));
+        assert_eq!(eval(multiply_exp.clone(), env.clone()).unwrap(), Exp::FloatNumber(6.25));
+
+        let divide_exp = scheme_list!(Exp::Symbol("/"), Exp::FloatNumber(25.0),
+                                                              Exp::FloatNumber(2.5));
+        assert_eq!(eval(divide_exp.clone(), env.clone()).unwrap(), Exp::FloatNumber(10.0));
+
+        let cons_exp = scheme_list!(Exp::Symbol("cons"), 
+                                        scheme_list!(Exp::Integer(1), Exp::Integer(2)),
+                                        scheme_list!(Exp::Integer(3), Exp::Integer(4)));
+        pretty_print(eval(cons_exp.clone(), env.clone()).unwrap());
+        assert_eq!(eval(cons_exp.clone(), env.clone()).unwrap(), 
+                   scheme_list!(scheme_list!(Exp::Integer(1), Exp::Integer(2)), 
+                                Exp::Integer(3), Exp::Integer(4)));
     }
 }
