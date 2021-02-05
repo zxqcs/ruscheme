@@ -80,11 +80,50 @@ pub mod  represent{
         }
 
         pub fn is_self_evaluating(&self) -> bool {
-            self.is_number() || self.is_string() || self.is_bool()
+            self.is_null() || self.is_number() || self.is_string() || self.is_bool() || is_number_combination(self.clone())
         }
+
+        pub fn is_null(&self) -> bool {
+            *self == Exp::List(Pair::Nil)
+        }
+
     }
 
         /* operations on Exp as function */
+        #[allow(dead_code)]
+        pub fn is_number_combination(exp: Exp) -> bool {
+            match exp {
+                Exp::FloatNumber(x) => true,
+                Exp::Integer(x) => true,
+                Exp::Symbol(x) => false,
+                Exp::Quote(x) => false,
+                Exp::SchemeString(x) => false,
+                Exp::Bool(x) => false,
+                Exp::List(Pair::Nil) => false,
+                Exp::List(Pair::Cons(x, y)) => {
+                    let s = is_number_combination(*x);
+                    if s {
+                        let mut temp = y;
+                        while let Pair::Cons(lhs, rhs) = *temp {
+                            let s1 = is_number_combination(*lhs);
+                            if s1 {
+                                if *rhs == Pair::Nil {
+                                    break;
+                                } else {
+                                    temp = rhs;
+                                }
+                            } else {
+                                return false
+                            }
+                        }
+                        return true
+                    } else {
+                        return false
+                    }
+                },
+            }
+        }
+
         #[allow(dead_code)]
         pub fn is_assignment(exp: Exp) -> bool { 
             is_tagged_list(exp, "set!")
@@ -668,5 +707,25 @@ mod tests {
         assert_eq!(procedure_parameters(procedure.clone()), parameters);
         assert_eq!(procedure_body(procedure.clone()), body);
         assert_eq!(procedure_environment(procedure.clone()).0, env.0);
+    }
+
+    #[test]
+    fn test_is_number_combination() {
+        let mut x = scheme_list!(scheme_list!(Exp::Integer(1),
+                                              Exp::Integer(2)),
+                                 scheme_list!(Exp::FloatNumber(3.1),
+                                              Exp::Symbol("s"),
+                                              Exp::Integer(4)),
+                                 scheme_list!(Exp::Integer(5),
+                                              Exp::Integer(6)));
+        assert_eq!(is_number_combination(x.clone()), false);
+        x = scheme_list!(scheme_list!(Exp::Integer(1),
+                                              Exp::Integer(2)),
+                                 scheme_list!(Exp::FloatNumber(3.1),
+                                              Exp::Integer(0),
+                                              Exp::Integer(4)),
+                                 scheme_list!(Exp::Integer(5),
+                                              Exp::Integer(6)));
+        assert_eq!(is_number_combination(x.clone()), true);
     }
 }
