@@ -11,6 +11,9 @@ pub mod display {
             Exp::Quote(x) => print!("{}", x),
             Exp::SchemeString(x) => print!("{}", x),
             Exp::Bool(x) => print!("{}", x),
+            Exp::List(Pair::Nil) => {
+                print!("()");
+            },
             Exp::List(Pair::Cons(x, y)) => {
                 print!("(");
                 print(*x);
@@ -27,9 +30,6 @@ pub mod display {
                     temp = rhs;
                 }
                 print!(")");
-            },
-            Exp::List(Pair::Nil) => {
-                print!("()");
             },
         }    
     }

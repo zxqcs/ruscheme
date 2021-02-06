@@ -66,6 +66,7 @@ pub mod env {
     #[allow(dead_code)]
     pub fn lookup_variable_value(var: Exp, env: Env) -> Exp {
         if env.0 == THE_EMPTY_ENVIRONMENT {
+            println!("var: {:?}", var);
             panic!("unbound variable");
         } else {
             let frame = first_frame(env.clone());
@@ -153,7 +154,7 @@ pub mod env {
 
 #[cfg(test)]
 mod test {
-    use crate::{core_of_interpreter::core_of_interpreter::{Env, Exp, Pair}, display::display::pretty_print};
+    use crate::{core_of_interpreter::core_of_interpreter::{Env, Exp, Pair}};
     use crate::tool::tools::{append, scheme_cons, generate_test_frames};
     use crate::scheme_list;
     use super::env::{add_binding_to_frame, define_variable, frame_values, frame_variables, lookup_variable_value, make_frame, set_variable_value};

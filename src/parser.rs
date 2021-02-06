@@ -106,12 +106,15 @@ pub mod parser {
             _ => false,
         }
     }
-    */
+*/    
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::scheme_list;
+    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
     use super::parser::*;
+    use crate::tool::tools::{append, scheme_cons};
     #[test]
     fn test_read_scheme_programs() {
         let mut programs: Vec<String> = vec![];
@@ -150,4 +153,28 @@ mod tests {
         let s2: Vec<String> = z.into_iter().map(|x| x.to_string()).collect();
         assert_eq!(y, s2);
     }
+/*
+    #[test]
+    fn test_assemble_abstract_syntax_tree() {
+        let mut programs: Vec<String> = vec![];
+        let mut tokens: Vec<String> = vec![];
+        read_scheme_programs_from_file(&mut programs);
+        tokens = tokenize(&mut programs);
+        let x = assemble_abstract_syntax_tree(&mut tokens);
+        let y = scheme_list!(Exp::Symbol("define".to_string()),
+                      scheme_list!(Exp::Symbol("fac".to_string()),
+                                   Exp::Symbol("n".to_string()),
+                      scheme_list!(Exp::Symbol("if".to_string()),
+                            scheme_list!(Exp::Symbol("=".to_string()),
+                                         Exp::Symbol("n".to_string()),
+                                         Exp::FloatNumber(1.0)),
+                            scheme_list!(Exp::Symbol("*".to_string()),
+                                         Exp::Symbol("n".to_string()),
+                                   scheme_list!(Exp::Symbol("fac".to_string()),
+                                          scheme_list!(Exp::Symbol("-".to_string()),
+                                                       Exp::Symbol("n".to_string()),
+                                                       Exp::FloatNumber(1.0)))))));
+        assert_eq!(x, y);
+    }
+*/    
 }

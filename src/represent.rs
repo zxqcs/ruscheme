@@ -1,7 +1,7 @@
 
 #![allow(unused_variables)]
 pub mod  represent{
-    use crate::{core_of_interpreter::core_of_interpreter::{Env, Exp, Pair}, scheme_list};
+    use crate::{core_of_interpreter::core_of_interpreter::{Env, Exp, Pair}, display::display::pretty_print, scheme_list};
     use crate::tool::tools::{scheme_cons, append};
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
@@ -29,6 +29,7 @@ pub mod  represent{
                     t if *t =="cdr".to_string() => true,
                     t if *t == "cons".to_string() => true,
                     t if *t == "null?".to_string() => true,
+                    t if *t == "=".to_string() => true,
                     _ => false,
                 }
             } else { false }
@@ -212,7 +213,7 @@ pub mod  represent{
             if cdddr(exp.clone()).unwrap() != s {
                 cadddr(exp.clone()).unwrap()
             } else {
-                Exp::Symbol("false".to_string())
+                panic!("if alternative not exist!");
             }
         }
 
