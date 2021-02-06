@@ -19,13 +19,16 @@ pub mod  represent{
         }
 
         pub fn is_primitive_procedure(&self) -> bool {
-            if let &Exp::Symbol(x) = self {
+            if let Exp::Symbol(x) = self {
                 match x {
-                    "*" | "/" | "+" | "-" => true,
-                    "car" => true,
-                    "cdr" => true,
-                    "cons" => true,
-                    "null?" => true,
+                    t if *t == "*".to_string() => true,
+                    t if *t ==  "/".to_string() => true,
+                    t if *t == "+".to_string() => true,
+                    t if *t == "-".to_string() => true,
+                    t if *t == "car".to_string() => true,
+                    t if *t =="cdr".to_string() => true,
+                    t if *t == "cons".to_string() => true,
+                    t if *t == "null?".to_string() => true,
                     _ => false,
                 }
             } else { false }
@@ -182,7 +185,7 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn make_lambda (parameters: Exp, body: Exp) -> Exp {
-            scheme_cons(Exp::Symbol("lambda"),
+            scheme_cons(Exp::Symbol("lambda".to_string()),
                           scheme_cons(parameters, body))
         }
 
@@ -209,13 +212,13 @@ pub mod  represent{
             if cdddr(exp.clone()).unwrap() != s {
                 cadddr(exp.clone()).unwrap()
             } else {
-                Exp::Symbol("false")
+                Exp::Symbol("false".to_string())
             }
         }
 
         #[allow(dead_code)]
         pub fn make_if(predicate: Exp, consequent: Exp, alternative: Exp) -> Exp{
-            let tag = Exp::Symbol("if");
+            let tag = Exp::Symbol("if".to_string());
             let null = Exp::List(Pair::Nil);
             scheme_cons(tag,scheme_cons(predicate,
                       scheme_cons(consequent, 
@@ -263,13 +266,13 @@ pub mod  represent{
 
         #[allow(dead_code)]
         pub fn make_begin(seq: Exp) -> Exp {
-            scheme_cons(Exp::Symbol("begin"), seq)
+            scheme_cons(Exp::Symbol("begin".to_string()), seq)
         }
 
         // representing procedures
         #[allow(dead_code)]
         pub fn make_procedure(parameters: Exp, body: Exp, env: Env) -> Exp {
-            scheme_list!(Exp::Symbol("procedure"), parameters, body, env.0)
+            scheme_list!(Exp::Symbol("procedure".to_string()), parameters, body, env.0)
         }
 
         #[allow(dead_code)]
@@ -469,20 +472,20 @@ mod tests {
     #[test] 
     fn test_is_string() {
         let str = "summer";
-        let x = Exp::Symbol(str);
+        let x = Exp::Symbol(str.to_string());
         assert_eq!(x.is_symbol(), true);
     }
 
     #[test]
     fn test_is_self_evaluating() {
         let x = Exp::FloatNumber(3.14);
-        let y = Exp::SchemeString("Winter");
+        let y = Exp::SchemeString("Winter".to_string());
         assert_eq!(x.is_self_evaluating() && y.is_self_evaluating(), true);
     }
 
     #[test]
     fn test_is_symbol() {
-        let x = Exp::Symbol("item");
+        let x = Exp::Symbol("item".to_string());
         assert_eq!(x.is_symbol(), true);
     }
 
@@ -501,7 +504,7 @@ mod tests {
 
     #[test]
     fn test_is_quoted() {
-        let x = Exp::Quote("'x");
+        let x = Exp::Quote("'x".to_string());
         assert_eq!(x.is_quoted(), true);
     }
 
@@ -509,12 +512,12 @@ mod tests {
     fn test_list_operatioins() {
         // It's painful to build List in Rust...
         // (define (square x) (* x  x))
-        let f1 = Box::new(Exp::Symbol("define"));
-        let y = Box::new(Exp::Symbol("square"));
-        let z = Box::new(Exp::Symbol("x"));
-        let a = Box::new(Exp::Symbol("*"));
-        let b = Box::new(Exp::Symbol("x"));
-        let c = Box::new(Exp::Symbol("x"));
+        let f1 = Box::new(Exp::Symbol("define".to_string()));
+        let y = Box::new(Exp::Symbol("square".to_string()));
+        let z = Box::new(Exp::Symbol("x".to_string()));
+        let a = Box::new(Exp::Symbol("*".to_string()));
+        let b = Box::new(Exp::Symbol("x".to_string()));
+        let c = Box::new(Exp::Symbol("x".to_string()));
         let d1 = Box::new(Pair::Nil);
         let d2 = Box::new(Pair::Nil);
         let d3 = Box::new(Pair::Nil);
@@ -545,8 +548,8 @@ mod tests {
         if let Ok(Exp::Symbol(x)) = car(exp.clone()) {
             assert_eq!(x.to_string(), "define");
         };
-        assert_eq!(caadr(exp.clone()).unwrap(), Exp::Symbol("square"));
-        assert_eq!(car(exp.clone()).unwrap(), Exp::Symbol("define"));
+        assert_eq!(caadr(exp.clone()).unwrap(), Exp::Symbol("square".to_string()));
+        assert_eq!(car(exp.clone()).unwrap(), Exp::Symbol("define".to_string()));
         assert_eq!(cdr(exp.clone()).unwrap(), x1);
         assert_eq!(cadr(exp.clone()).unwrap(), x2);
         assert_eq!(cddr(exp.clone()).unwrap(), Exp::List(x3));
@@ -557,12 +560,12 @@ mod tests {
 
     #[test]
     fn test_equlity() {
-        let f1 = Box::new(Exp::Symbol("define"));
-        let y = Box::new(Exp::Symbol("square"));
-        let z = Box::new(Exp::Symbol("x"));
-        let a = Box::new(Exp::Symbol("*"));
-        let b = Box::new(Exp::Symbol("x"));
-        let c = Box::new(Exp::Symbol("x"));
+        let f1 = Box::new(Exp::Symbol("define".to_string()));
+        let y = Box::new(Exp::Symbol("square".to_string()));
+        let z = Box::new(Exp::Symbol("x".to_string()));
+        let a = Box::new(Exp::Symbol("*".to_string()));
+        let b = Box::new(Exp::Symbol("x".to_string()));
+        let c = Box::new(Exp::Symbol("x".to_string()));
         let d1 = Box::new(Pair::Nil);
         let d2 = Box::new(Pair::Nil);
         let d3 = Box::new(Pair::Nil);
@@ -592,12 +595,12 @@ mod tests {
 
     #[test]
     fn test_tagged_list() {
-        let f1 = Box::new(Exp::Symbol("define"));
-        let y = Box::new(Exp::Symbol("square"));
-        let z = Box::new(Exp::Symbol("x"));
-        let a = Box::new(Exp::Symbol("*"));
-        let b = Box::new(Exp::Symbol("x"));
-        let c = Box::new(Exp::Symbol("x"));
+        let f1 = Box::new(Exp::Symbol("define".to_string()));
+        let y = Box::new(Exp::Symbol("square".to_string()));
+        let z = Box::new(Exp::Symbol("x".to_string()));
+        let a = Box::new(Exp::Symbol("*".to_string()));
+        let b = Box::new(Exp::Symbol("x".to_string()));
+        let c = Box::new(Exp::Symbol("x".to_string()));
         let d1 = Box::new(Pair::Nil);
         let d2 = Box::new(Pair::Nil);
         let d3 = Box::new(Pair::Nil);
@@ -631,11 +634,11 @@ mod tests {
         let if_exp = data.if_expression;
         assert_eq!(is_if(if_exp.clone()), true);
         
-        let s1 = Exp::Symbol("if");
-        let s2 = Exp::Symbol("n");
+        let s1 = Exp::Symbol("if".to_string());
+        let s2 = Exp::Symbol("n".to_string());
         let s3 = Exp::Integer(1);
-        let s4 = Exp::Symbol("-");
-        let s5 = Exp::Symbol("=");
+        let s4 = Exp::Symbol("-".to_string());
+        let s5 = Exp::Symbol("=".to_string());
         let x1 = scheme_list!(s5, s2.clone(), s3.clone());
         let x2 = scheme_list!(s4, s2.clone(), s3.clone());
         assert_eq!(if_predicate(if_exp.clone()), x1);
@@ -652,10 +655,10 @@ mod tests {
         let begin_exp = data.begin_expression;
         let t1 = Exp::Integer(5);
         let t2 = Exp::Integer(1);
-        let t3 = Exp::Symbol("set!");
-        let t4 = Exp::Symbol("begin");
-        let t5 = Exp::Symbol("x");
-        let t6 = Exp::Symbol("+");
+        let t3 = Exp::Symbol("set!".to_string());
+        let t4 = Exp::Symbol("begin".to_string());
+        let t5 = Exp::Symbol("x".to_string());
+        let t6 = Exp::Symbol("+".to_string());
         // (set! x 5) 
         let y1 = scheme_list!(t3, t5.clone(), t1);
         // (+ x 1)
@@ -673,7 +676,7 @@ mod tests {
     fn test_application() {
         let data = generate_test_data();
         let app_exp = data.applicatioin_expressioin;
-        let p1 = Exp::Symbol("procedure");
+        let p1 = Exp::Symbol("procedure".to_string());
         let p2 = Exp::Integer(3);
         let p3 = Exp::Integer(4);
         assert_eq!(is_application(app_exp.clone()), true);
@@ -689,9 +692,9 @@ mod tests {
         let lambda_exp = data.lambda_expression;
 
         // (lambda (x) (* x x))
-        let r1 = Exp::Symbol("lambda");
-        let r2 = Exp::Symbol("x");
-        let r3 = Exp::Symbol("*");
+        let r1 = Exp::Symbol("lambda".to_string());
+        let r2 = Exp::Symbol("x".to_string());
+        let r3 = Exp::Symbol("*".to_string());
 
         let parameters = scheme_list!(r2.clone());
         let body = scheme_list!(scheme_list!(r3, r2.clone(), r2.clone()));
@@ -709,9 +712,10 @@ mod tests {
         // env:  (((x y z) 1 2 3) ((u v) 4 5))
         let frame = generate_test_frames().frame;
         let env = Env(scheme_list!(frame));
-        let parameters = scheme_list!(Exp::Symbol("x"), Exp::Symbol("y"));
-        let body = scheme_list!(Exp::Symbol("+"), Exp::Symbol("x"), Exp::Symbol("y"));
-        let procedure = scheme_list!(Exp::Symbol("procedure"), 
+        let parameters = scheme_list!(Exp::Symbol("x".to_string()), Exp::Symbol("y".to_string()));
+        let body = scheme_list!(Exp::Symbol("+".to_string()), Exp::Symbol("x".to_string()), 
+                                Exp::Symbol("y".to_string()));
+        let procedure = scheme_list!(Exp::Symbol("procedure".to_string()), 
                                          parameters.clone(),
                                          body.clone(),
                                          env.0.clone());
@@ -726,7 +730,7 @@ mod tests {
         let mut x = scheme_list!(scheme_list!(Exp::Integer(1),
                                               Exp::Integer(2)),
                                  scheme_list!(Exp::FloatNumber(3.1),
-                                              Exp::Symbol("s"),
+                                              Exp::Symbol("s".to_string()),
                                               Exp::Integer(4)),
                                  scheme_list!(Exp::Integer(5),
                                               Exp::Integer(6)));

@@ -44,8 +44,8 @@ pub mod display {
 
     #[allow(dead_code)]
     pub fn test_display() {
-        let plus = Exp::Symbol("+");
-        let x = Exp::Symbol("x");
+        let plus = Exp::Symbol("+".to_string());
+        let x = Exp::Symbol("x".to_string());
         let null = Exp::List(Pair::Nil);
         //  parameters: (x)
         let parameters = scheme_cons(x.clone(), null.clone());

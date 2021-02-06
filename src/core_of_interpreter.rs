@@ -44,9 +44,9 @@ pub mod core_of_interpreter {
         FloatNumber(f32),
         Integer(i32),
         List(Pair),
-        Symbol(&'static str),
-        Quote(&'static str),
-        SchemeString(&'static str),
+        Symbol(String),
+        Quote(String),
+        SchemeString(String),
         Bool(bool),
     }
 
@@ -127,7 +127,7 @@ pub mod core_of_interpreter {
         } else if is_number_combination(exp.clone()) {
             Ok(exp)
         } else if exp.is_primitive_procedure() {
-            Ok(scheme_cons(Exp::Symbol("primitive"), exp))
+            Ok(scheme_cons(Exp::Symbol("primitive".to_string()), exp))
         } else if exp.is_variable(){
             Ok(lookup_variable_value(exp, env))
         } else if exp.is_quoted() {
@@ -211,14 +211,14 @@ pub mod core_of_interpreter {
     fn apply_primitive_procedure(p: Exp, args: Exp) -> Exp {
         if let Exp::Symbol(x) = cadr(p).unwrap() {
             match x {
-                "*" => {
+                t if t =="*".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
                         Exp::FloatNumber(lhs.to_number() * rhs.to_number())
                     } else { panic!("wrong number of args!");}
                 },
-                "/" => {
+                t if t == "/".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
@@ -229,38 +229,38 @@ pub mod core_of_interpreter {
                         }
                     } else { panic!("wrong number of args!"); }
                 },
-                "+" => {
+                t if t == "+".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
                         Exp::FloatNumber(lhs.to_number() + rhs.to_number())
                     } else { panic!("wrong number of args!"); }
                 },
-                "-" => {
+                t if t == "-".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
                         Exp::FloatNumber(lhs.to_number() - rhs.to_number())
                     } else { panic!("wrong number of args!"); }
                 },
-                "car" => {
+                t if t == "car".to_string() => {
                     if args.is_pair() {
                         caar(args).unwrap()
                     } else { panic!("not a proper schemem list: car"); }
                 }
-                "cdr" => {
+                t if t == "cdr".to_string() => {
                     if args.is_pair() {
                         cdar(args).unwrap()
                     } else { panic!("not a proper schemem list: cdr"); }
                 },
-                "cons" => {
+                t if t == "cons".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
                         scheme_cons(lhs, rhs)
                     } else { panic!("not a proper schemem list: cons"); }
                 },
-                "null?" => {
+                t if t == "null?".to_string() => {
                     if list_length(args.clone()) == 1 {
                         if car(args).unwrap() == Exp::List(Pair::Nil) {
                             Exp::Bool(true)
@@ -287,8 +287,8 @@ mod test {
     fn test_eval_self_evaluating_exp() {
         let x1 =  Exp::Integer(1);
         let x2 = Exp::FloatNumber(3.14);
-        let x3 = Exp::Quote("winter");
-        let x4 = Exp::SchemeString("WINTER IS COMING!");
+        let x3 = Exp::Quote("winter".to_string());
+        let x4 = Exp::SchemeString("WINTER IS COMING!".to_string());
         let x5 = Exp::Bool(true);
         let x6 = Exp::Bool(false);
         let env = Env(Exp::List(Pair::Nil));
@@ -303,116 +303,123 @@ mod test {
     #[test]
     fn test_eval_single_variable() {
         let mut env = Env(Exp::List(Pair::Nil));
-        env = extend_environment(scheme_list!(Exp::Symbol("x")), 
+        env = extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
                                  scheme_list!(Exp::Integer(8)), env).unwrap(); 
-        assert_eq!(eval(Exp::Symbol("x"), env.clone()).unwrap(), Exp::Integer(8));
+        assert_eq!(eval(Exp::Symbol("x".to_string()), env.clone()).unwrap(), Exp::Integer(8));
     }
 
     #[test]
     fn test_eval_assignment() {
         let mut env = Env(Exp::List(Pair::Nil));
-        env = extend_environment(scheme_list!(Exp::Symbol("x")), 
+        env = extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
                                  scheme_list!(Exp::Integer(8)), env).unwrap(); 
         
-        let assignment = scheme_list!(Exp::Symbol("define"), Exp::Symbol("x"), Exp::Integer(101));
+        let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
+                                          Exp::Symbol("x".to_string()), Exp::Integer(101));
         env = Env(eval(assignment.clone(), env).unwrap()); 
-        assert_eq!(eval(Exp::Symbol("x"), env.clone()).unwrap(), Exp::Integer(101));
+        assert_eq!(eval(Exp::Symbol("x".to_string()), env.clone()).unwrap(), Exp::Integer(101));
     }
 
     #[test]
     fn test_eval_definition_single_variable() {
         let mut env = Env(Exp::List(Pair::Nil));
-        env = extend_environment(scheme_list!(Exp::Symbol("x")), 
+        env = extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
                                  scheme_list!(Exp::Integer(8)), env).unwrap(); 
         
-        let assignment = scheme_list!(Exp::Symbol("define"), Exp::Symbol("x"), Exp::Integer(101));
+        let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
+                                          Exp::Symbol("x".to_string()), Exp::Integer(101));
         env = Env(eval(assignment.clone(), env).unwrap()); 
-        let definition = scheme_list!(Exp::Symbol("define"), Exp::Symbol("x"), Exp::Integer(999));
+        let definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                         Exp::Symbol("x".to_string()), Exp::Integer(999));
         env = Env(eval(definition, env).unwrap()); 
-        let second_definition = scheme_list!(Exp::Symbol("define"), Exp::Symbol("y"), Exp::Integer(333));
+        let second_definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                                Exp::Symbol("y".to_string()), Exp::Integer(333));
         env = Env(eval(second_definition, env).unwrap()); 
-        assert_eq!(eval(Exp::Symbol("x"), env.clone()).unwrap(), Exp::Integer(999));
-        assert_eq!(eval(Exp::Symbol("y"), env.clone()).unwrap(), Exp::Integer(333));
+        assert_eq!(eval(Exp::Symbol("x".to_string()), env.clone()).unwrap(), Exp::Integer(999));
+        assert_eq!(eval(Exp::Symbol("y".to_string()), env.clone()).unwrap(), Exp::Integer(333));
     }
 
     #[test]
     fn test_eval_definition_compoud_procedure() {
         let mut env = Env(Exp::List(Pair::Nil));
-        env = extend_environment(scheme_list!(Exp::Symbol("x")), 
+        env = extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
                                  scheme_list!(Exp::Integer(8)), env).unwrap(); 
         
-        let assignment = scheme_list!(Exp::Symbol("define"), Exp::Symbol("x"), Exp::Integer(101));
+        let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
+                                          Exp::Symbol("x".to_string()), Exp::Integer(101));
         env = Env(eval(assignment.clone(), env).unwrap()); 
-        let definition = scheme_list!(Exp::Symbol("define"), Exp::Symbol("x"), Exp::Integer(999));
+        let definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                         Exp::Symbol("x".to_string()), Exp::Integer(999));
         env = Env(eval(definition, env).unwrap()); 
-        let second_definition = scheme_list!(Exp::Symbol("define"), Exp::Symbol("y"), Exp::Integer(333));
+        let second_definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                                Exp::Symbol("y".to_string()), Exp::Integer(333));
         env = Env(eval(second_definition, env).unwrap()); 
-        let another_definition = scheme_list!(Exp::Symbol("define"), 
-                                    scheme_list!(Exp::Symbol("square"),
-                                                 Exp::Symbol("x")),
-                                    scheme_list!(Exp::Symbol("*"),
-                                                 Exp::Symbol("x"),
-                                                 Exp::Symbol("x")));
+        let another_definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                    scheme_list!(Exp::Symbol("square".to_string()),
+                                                 Exp::Symbol("x".to_string())),
+                                    scheme_list!(Exp::Symbol("*".to_string()),
+                                                 Exp::Symbol("x".to_string()),
+                                                 Exp::Symbol("x".to_string())));
         env = Env(eval(another_definition.clone(), env.clone()).unwrap());
-        let app_exp = scheme_list!(Exp::Symbol("square"), Exp::Integer(3));
+        let app_exp = scheme_list!(Exp::Symbol("square".to_string()), Exp::Integer(3));
         assert_eq!(eval(app_exp, env).unwrap(), Exp::FloatNumber(9.0));
     }
 
     #[test]
     fn test_eval_primitive_procedure() {
         let mut env = Env(Exp::List(Pair::Nil));
-        env = extend_environment(scheme_list!(Exp::Symbol("x")), 
+        env = extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
                                  scheme_list!(Exp::Integer(8)), env).unwrap(); 
         
-        let assignment = scheme_list!(Exp::Symbol("define"), Exp::Symbol("x"), Exp::Integer(101));
+        let assignment = scheme_list!(Exp::Symbol("define".to_string()), Exp::Symbol("x".to_string()), Exp::Integer(101));
         env = Env(eval(assignment.clone(), env).unwrap()); 
-        let definition = scheme_list!(Exp::Symbol("define"), Exp::Symbol("x"), Exp::Integer(999));
+        let definition = scheme_list!(Exp::Symbol("define".to_string()), Exp::Symbol("x".to_string()), Exp::Integer(999));
         env = Env(eval(definition, env).unwrap()); 
-        let second_definition = scheme_list!(Exp::Symbol("define"), Exp::Symbol("y"), Exp::Integer(333));
+        let second_definition = scheme_list!(Exp::Symbol("define".to_string()), Exp::Symbol("y".to_string()), Exp::Integer(333));
         env = Env(eval(second_definition, env).unwrap()); 
-        let another_definition = scheme_list!(Exp::Symbol("define"), 
-                                    scheme_list!(Exp::Symbol("square"),
-                                                 Exp::Symbol("x")),
-                                    scheme_list!(Exp::Symbol("*"),
-                                                 Exp::Symbol("x"),
-                                                 Exp::Symbol("x")));
+        let another_definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                    scheme_list!(Exp::Symbol("square".to_string()),
+                                                 Exp::Symbol("x".to_string())),
+                                    scheme_list!(Exp::Symbol("*".to_string()),
+                                                 Exp::Symbol("x".to_string()),
+                                                 Exp::Symbol("x".to_string())));
         env = Env(eval(another_definition.clone(), env.clone()).unwrap());
-        let app_exp = scheme_list!(Exp::Symbol("square"), Exp::Integer(3));
+        let app_exp = scheme_list!(Exp::Symbol("square".to_string()), Exp::Integer(3));
         // (define s ((1 2) (3 4) 5))
         let s = scheme_list!(scheme_list!(Exp::Integer(1), Exp::Integer(2)),
                                  scheme_list!(Exp::Integer(3), Exp::Integer(4)),
                                  Exp::Integer(5));
-        let s_definition = scheme_list!(Exp::Symbol("define"),
-                                           Exp::Symbol("s"),
+        let s_definition = scheme_list!(Exp::Symbol("define".to_string()),
+                                           Exp::Symbol("s".to_string()),
                                            s);
         env = Env(eval(s_definition.clone(), env).unwrap());
-        let car_exp = scheme_list!(Exp::Symbol("car"), Exp::Symbol("s"));
+        let car_exp = scheme_list!(Exp::Symbol("car".to_string()), Exp::Symbol("s".to_string()));
         assert_eq!(eval(car_exp, env.clone()).unwrap(), scheme_list!(Exp::Integer(1),
                                                              Exp::Integer(2)));
-        let cdr_exp = scheme_list!(Exp::Symbol("cdr"), Exp::Symbol("s"));
+        let cdr_exp = scheme_list!(Exp::Symbol("cdr".to_string()), Exp::Symbol("s".to_string()));
         assert_eq!(eval(cdr_exp, env.clone()).unwrap(),
                  scheme_list!(scheme_list!(Exp::Integer(3), Exp::Integer(4)),
                                 Exp::Integer(5)));
-        let null_exp = scheme_list!(Exp::Symbol("null?"), Exp::List(Pair::Nil));
+        let null_exp = scheme_list!(Exp::Symbol("null?".to_string()), Exp::List(Pair::Nil));
         assert_eq!(eval(null_exp.clone(), env.clone()).unwrap(), Exp::Bool(true));
 
-        let add_exp = scheme_list!(Exp::Symbol("+"), Exp::FloatNumber(3.15),
+        let add_exp = scheme_list!(Exp::Symbol("+".to_string()), Exp::FloatNumber(3.15),
                                                          Exp::FloatNumber(1.85));
         assert_eq!(eval(add_exp.clone(), env.clone()).unwrap(), Exp::FloatNumber(5.0));
 
-        let substract_exp = scheme_list!(Exp::Symbol("-"), Exp::Integer(8), 
+        let substract_exp = scheme_list!(Exp::Symbol("-".to_string()), Exp::Integer(8), 
                                                                Exp::FloatNumber(2.5));
         assert_eq!(eval(substract_exp.clone(), env.clone()).unwrap(), Exp::FloatNumber(5.5));
 
-        let multiply_exp = scheme_list!(Exp::Symbol("*"), Exp::FloatNumber(2.5),
+        let multiply_exp = scheme_list!(Exp::Symbol("*".to_string()), Exp::FloatNumber(2.5),
                                                               Exp::FloatNumber(2.5));
         assert_eq!(eval(multiply_exp.clone(), env.clone()).unwrap(), Exp::FloatNumber(6.25));
 
-        let divide_exp = scheme_list!(Exp::Symbol("/"), Exp::FloatNumber(25.0),
+        let divide_exp = scheme_list!(Exp::Symbol("/".to_string()), Exp::FloatNumber(25.0),
                                                               Exp::FloatNumber(2.5));
         assert_eq!(eval(divide_exp.clone(), env.clone()).unwrap(), Exp::FloatNumber(10.0));
 
-        let cons_exp = scheme_list!(Exp::Symbol("cons"), 
+        let cons_exp = scheme_list!(Exp::Symbol("cons".to_string()), 
                                         scheme_list!(Exp::Integer(1), Exp::Integer(2)),
                                         scheme_list!(Exp::Integer(3), Exp::Integer(4)));
         pretty_print(eval(cons_exp.clone(), env.clone()).unwrap());

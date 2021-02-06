@@ -72,11 +72,11 @@ use crate::represent::represent::{car, cdr};
 #[allow(dead_code)]
     pub fn generate_test_data() -> TestData {
         // (if (= n 1)  1  (-  n  1)) 
-        let s1 = Exp::Symbol("if");
-        let s2 = Exp::Symbol("n");
+        let s1 = Exp::Symbol("if".to_string());
+        let s2 = Exp::Symbol("n".to_string());
         let s3 = Exp::Integer(1);
-        let s4 = Exp::Symbol("-");
-        let s5 = Exp::Symbol("=");
+        let s4 = Exp::Symbol("-".to_string());
+        let s5 = Exp::Symbol("=".to_string());
         let x1 = scheme_list!(s5, s2.clone(), s3.clone());
         let x2 = scheme_list!(s4, s2.clone(), s3.clone());
         let if_exp = scheme_list!(s1, x1, s3.clone(), x2);
@@ -84,25 +84,25 @@ use crate::represent::represent::{car, cdr};
         // (begin (set! x 5) (+ x 1))
         let t1 = Exp::Integer(5);
         let t2 = Exp::Integer(1);
-        let t3 = Exp::Symbol("set!");
-        let t4 = Exp::Symbol("begin");
-        let t5 = Exp::Symbol("x");
-        let t6 = Exp::Symbol("+");
+        let t3 = Exp::Symbol("set!".to_string());
+        let t4 = Exp::Symbol("begin".to_string());
+        let t5 = Exp::Symbol("x".to_string());
+        let t6 = Exp::Symbol("+".to_string());
         let y1 = scheme_list!(t3, t5.clone(), t1);
         let y2 = scheme_list!(t6, t5.clone(), t2);
         let begin_exp = scheme_list!(t4, y1, y2);
 
         // (lambda (x) (* x x))
-        let r1 = Exp::Symbol("lambda");
-        let r2 = Exp::Symbol("x");
-        let r3 = Exp::Symbol("*");
+        let r1 = Exp::Symbol("lambda".to_string());
+        let r2 = Exp::Symbol("x".to_string());
+        let r3 = Exp::Symbol("*".to_string());
         let null =  Exp::List(Pair::Nil);
         let r4 = scheme_cons(r2.clone(), null);
         let r5 = scheme_list!(r3, r2.clone(), r2.clone());
         let lambda_exp = scheme_list!(r1, r4, r5);
 
         // (procedure 3 4)
-        let p1 = Exp::Symbol("procedure");
+        let p1 = Exp::Symbol("procedure".to_string());
         let p2 = Exp::Integer(3);
         let p3 = Exp::Integer(4);
         let app_exp = scheme_list!(p1, p2, p3);
@@ -137,13 +137,13 @@ use crate::represent::represent::{car, cdr};
 
 #[allow(dead_code)]
     pub fn generate_test_frames() -> Frames {
-        let x = Exp::Symbol("x");
-        let y = Exp::Symbol("y");
-        let z = Exp::Symbol("z");
+        let x = Exp::Symbol("x".to_string());
+        let y = Exp::Symbol("y".to_string());
+        let z = Exp::Symbol("z".to_string());
         let one = Exp::Integer(1);
         let two = Exp::Integer(2);
         let three = Exp::Integer(3);
-        let a = Exp::Symbol("a");
+        let a = Exp::Symbol("a".to_string());
         let four = Exp::Integer(4);
         let variables = scheme_list!(x.clone(), y.clone(), z.clone());
         let values = scheme_list!(one.clone(), two.clone(), 
@@ -166,8 +166,8 @@ mod test {
     // ((lambda (x) (+ x x)) 4) =>  8
     // lambda prameters: (x) 
     // lambda body: ((+ x x))
-        let plus = Exp::Symbol("+");
-        let x = Exp::Symbol("x");
+        let plus = Exp::Symbol("+".to_string());
+        let x = Exp::Symbol("x".to_string());
         let null = Exp::List(Pair::Nil);
         //  parameters: (x)
         let parameters = scheme_cons(x.clone(), null.clone());
@@ -202,10 +202,10 @@ mod test {
     #[test]
     fn test_set_cdr() {
         // ("hello" "world")  -> ("hello" "fool")
-        let hello = Exp::Symbol("hello");
-        let world = Exp::Symbol("world");
+        let hello = Exp::Symbol("hello".to_string());
+        let world = Exp::Symbol("world".to_string());
         
-        let fool = Exp::Symbol("fool");
+        let fool = Exp::Symbol("fool".to_string());
         let s1 = scheme_list!(hello.clone(), world);
         let s2 = scheme_list!(hello.clone(), fool.clone());
         assert_eq!(s2, set_cdr(s1, fool).unwrap());
@@ -213,9 +213,9 @@ mod test {
 
     #[test]
     fn test_set_car() {
-        let hello = Exp::Symbol("hello");
-        let world = Exp::Symbol("world");
-        let fool = Exp::Symbol("fool");
+        let hello = Exp::Symbol("hello".to_string());
+        let world = Exp::Symbol("world".to_string());
+        let fool = Exp::Symbol("fool".to_string());
          
         let s1 = scheme_list!(hello.clone(), world.clone());
         let s2 = scheme_list!(fool.clone(), world.clone());

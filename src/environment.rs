@@ -179,7 +179,7 @@ mod test {
 
     #[test]
     fn test_add_binding_to_frame() {
-        let a = Exp::Symbol("a");
+        let a = Exp::Symbol("a".to_string());
         let four = Exp::Integer(4);
         let data = generate_test_frames();
         let s = add_binding_to_frame(a, four, data.frame);
@@ -189,58 +189,58 @@ mod test {
     #[test]
     fn test_lookup_variable_value() {
         let frame_one = generate_test_frames().frame;
-        let u = Exp::Symbol("u");
-        let v = Exp::Symbol("v");
+        let u = Exp::Symbol("u".to_string());
+        let v = Exp::Symbol("v".to_string());
         let four = Exp::Integer(4);
         let five = Exp::Integer(5);
         let frame_two = scheme_list!(scheme_list!(u, v), four, five);
         let test_env = Env(scheme_list!(frame_one, frame_two));
-        assert_eq!(lookup_variable_value(Exp::Symbol("u"), test_env.clone()), Exp::Integer(4));
-        assert_eq!(lookup_variable_value(Exp::Symbol("v"), test_env.clone()), Exp::Integer(5));
-        assert_eq!(lookup_variable_value(Exp::Symbol("z"), test_env.clone()), Exp::Integer(3));
-        assert_eq!(lookup_variable_value(Exp::Symbol("x"), test_env), Exp::Integer(1));
+        assert_eq!(lookup_variable_value(Exp::Symbol("u".to_string()), test_env.clone()), Exp::Integer(4));
+        assert_eq!(lookup_variable_value(Exp::Symbol("v".to_string()), test_env.clone()), Exp::Integer(5));
+        assert_eq!(lookup_variable_value(Exp::Symbol("z".to_string()), test_env.clone()), Exp::Integer(3));
+        assert_eq!(lookup_variable_value(Exp::Symbol("x".to_string()), test_env), Exp::Integer(1));
     }
     #[test]
     fn test_set_variable_value() {
         let frame_one = generate_test_frames().frame;
-        let u = Exp::Symbol("u");
-        let v = Exp::Symbol("v");
+        let u = Exp::Symbol("u".to_string());
+        let v = Exp::Symbol("v".to_string());
         let four = Exp::Integer(4);
         let five = Exp::Integer(5);
         let frame_two = scheme_list!(scheme_list!(u, v), four, five);
         let test_env = Env(scheme_list!(frame_one, frame_two));
-        let modified_env = set_variable_value(Exp::Symbol("v"),
+        let modified_env = set_variable_value(Exp::Symbol("v".to_string()),
                                                         Exp::Integer(0),  
                                                             test_env.clone());
-        let another_env = set_variable_value(Exp::Symbol("u"), 
+        let another_env = set_variable_value(Exp::Symbol("u".to_string()), 
                                                      Exp::Integer(9), modified_env.clone());
-        let one_more_env = set_variable_value(Exp::Symbol("z"), Exp::Integer(1000), another_env.clone());
-        assert_eq!(lookup_variable_value(Exp::Symbol("v"), modified_env), Exp::Integer(0));
-        assert_eq!(lookup_variable_value(Exp::Symbol("u"), another_env), Exp::Integer(9));
-        assert_eq!(lookup_variable_value(Exp::Symbol("z"), one_more_env.clone()), Exp::Integer(1000));
+        let one_more_env = set_variable_value(Exp::Symbol("z".to_string()), Exp::Integer(1000), another_env.clone());
+        assert_eq!(lookup_variable_value(Exp::Symbol("v".to_string()), modified_env), Exp::Integer(0));
+        assert_eq!(lookup_variable_value(Exp::Symbol("u".to_string()), another_env), Exp::Integer(9));
+        assert_eq!(lookup_variable_value(Exp::Symbol("z".to_string()), one_more_env.clone()), Exp::Integer(1000));
     }
 
     #[test]
     fn test_define_variable() {
         let frame_one = generate_test_frames().frame;
-        let u = Exp::Symbol("u");
-        let v = Exp::Symbol("v");
+        let u = Exp::Symbol("u".to_string());
+        let v = Exp::Symbol("v".to_string());
         let four = Exp::Integer(4);
         let five = Exp::Integer(5);
         let frame_two = scheme_list!(scheme_list!(u, v), four, five);
         let mut test_env = Env(scheme_list!(frame_one, frame_two));
-        test_env = define_variable(Exp::Symbol("x"), Exp::Integer(0), test_env);
-        assert_eq!(lookup_variable_value(Exp::Symbol("x"), test_env.clone()), Exp::Integer(0));
-        test_env = define_variable(Exp::Symbol("s"), Exp::Integer(101), test_env);
-        assert_eq!(lookup_variable_value(Exp::Symbol("s"), test_env.clone()), Exp::Integer(101));
-        test_env = define_variable(Exp::Symbol("y"), Exp::Integer(333), test_env);
-        assert_eq!(lookup_variable_value(Exp::Symbol("y"), test_env.clone()), Exp::Integer(333));
-        let mut another_env = define_variable(Exp::Symbol("p"), Exp::Integer(100), 
+        test_env = define_variable(Exp::Symbol("x".to_string()), Exp::Integer(0), test_env);
+        assert_eq!(lookup_variable_value(Exp::Symbol("x".to_string()), test_env.clone()), Exp::Integer(0));
+        test_env = define_variable(Exp::Symbol("s".to_string()), Exp::Integer(101), test_env);
+        assert_eq!(lookup_variable_value(Exp::Symbol("s".to_string()), test_env.clone()), Exp::Integer(101));
+        test_env = define_variable(Exp::Symbol("y".to_string()), Exp::Integer(333), test_env);
+        assert_eq!(lookup_variable_value(Exp::Symbol("y".to_string()), test_env.clone()), Exp::Integer(333));
+        let mut another_env = define_variable(Exp::Symbol("p".to_string()), Exp::Integer(100), 
                                          Env(Exp::List(Pair::Nil)));
-        assert_eq!(lookup_variable_value(Exp::Symbol("p"), another_env.clone()), Exp::Integer(100));
-        another_env = define_variable(Exp::Symbol("d"), Exp::Integer(27), another_env.clone());
-        assert_eq!(lookup_variable_value(Exp::Symbol("d"), another_env.clone()), Exp::Integer(27));
-        another_env = define_variable(Exp::Symbol("g"), Exp::Integer(81), another_env.clone());
-        assert_eq!(lookup_variable_value(Exp::Symbol("g"), another_env.clone()), Exp::Integer(81));
+        assert_eq!(lookup_variable_value(Exp::Symbol("p".to_string()), another_env.clone()), Exp::Integer(100));
+        another_env = define_variable(Exp::Symbol("d".to_string()), Exp::Integer(27), another_env.clone());
+        assert_eq!(lookup_variable_value(Exp::Symbol("d".to_string()), another_env.clone()), Exp::Integer(27));
+        another_env = define_variable(Exp::Symbol("g".to_string()), Exp::Integer(81), another_env.clone());
+        assert_eq!(lookup_variable_value(Exp::Symbol("g".to_string()), another_env.clone()), Exp::Integer(81));
     }
 }

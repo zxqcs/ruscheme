@@ -61,7 +61,7 @@ pub mod parser {
         }
         x
     }
-
+/*
     #[allow(dead_code)]
     pub fn assemble_abstract_syntax_tree(tokens: &mut Vec<String>) -> Exp {
         let mut tree = Exp::List(Pair::Nil); 
@@ -96,7 +96,7 @@ pub mod parser {
     }
 
     fn read_scheme_string(tokens: &mut Vec<String>) -> Exp {
-        Exp::SchemeString("hello world!")
+        Exp::SchemeString("hello world!".to_string())
     }
 
     fn helper(x: String) -> bool {
@@ -106,6 +106,7 @@ pub mod parser {
             _ => false,
         }
     }
+    */
 }
 
 #[cfg(test)]
