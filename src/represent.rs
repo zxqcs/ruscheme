@@ -272,8 +272,8 @@ pub mod  represent{
 
         // representing procedures
         #[allow(dead_code)]
-        pub fn make_procedure(parameters: Exp, body: Exp, env: Env) -> Exp {
-            scheme_list!(Exp::Symbol("procedure".to_string()), parameters, body, env.0)
+        pub fn make_procedure(parameters: Exp, body: Exp) -> Exp {
+            scheme_list!(Exp::Symbol("procedure".to_string()), parameters, body)
         }
 
         #[allow(dead_code)]
@@ -295,11 +295,11 @@ pub mod  represent{
         pub fn procedure_body(p: Exp) -> Exp {
             caddr(p).unwrap()
         }
-
-        #[allow(dead_code)]
-        pub fn procedure_environment(p: Exp) -> Env {
-            Env(cadddr(p).unwrap())
-        }
+        /* procedure_environment to be deleted */
+        // #[allow(dead_code)]
+        // pub fn procedure_environment(p: Exp) -> Env {
+        //    Env(cadddr(p).unwrap())
+        // }
         // A procedure application is any compound expression that is 
         // not one of the above expression types
         #[allow(dead_code)]

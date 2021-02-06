@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{display::display::pretty_print, represent::represent::{assignment_variable, begin_actions, caar, cdar, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_number_combination, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body, procedure_environment, procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
+    use crate::{display::display::pretty_print, represent::represent::{assignment_variable, begin_actions, caar, cdar, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_number_combination, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body,procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
     use crate::represent::represent::{no_operands, first_operand,rest_operands,car,cadr};
     use crate::environment::env::*;
 
@@ -140,21 +140,22 @@ pub mod core_of_interpreter {
             Ok(eval_if(exp, env))
         } else if is_lambda(exp.clone()) {
             Ok(make_procedure(lambda_parameters(exp.clone()), 
-                                     lambda_body(exp), env))
+                                     lambda_body(exp)))
         } else if is_begin(exp.clone()) {
             Ok(eval_sequence(begin_actions(exp), env))
         } else if is_application(exp.clone()) {
             println!("entering apply");
             pretty_print(env.clone().0);
-           Ok(apply(eval(operator(exp.clone()), env.clone()).unwrap(),
-                     list_of_values(operands(exp), env)).unwrap())
+            apply(eval(operator(exp.clone()), env.clone()).unwrap(),
+                     list_of_values(operands(exp), env.clone()), 
+                     env.clone())
         } else {
             Err("unknow expression, type: EVAL")
         }
     }
 
     #[allow(dead_code)]
-    fn apply(p: Exp, args: Exp) -> Result<Exp, &'static str> {
+    fn apply(p: Exp, args: Exp, env: Env) -> Result<Exp, &'static str> {
         if is_primitive_procedure(p.clone()) {
             Ok(apply_primitive_procedure(p, args))
         } else if is_compound_procedure(p.clone()) {
@@ -162,7 +163,7 @@ pub mod core_of_interpreter {
             pretty_print(p.clone());
             Ok(eval_sequence(procedure_body(p.clone()), extend_environment(
                                 procedure_parameters(p.clone()), args,
-                              procedure_environment(p)).unwrap()))
+                              env).unwrap()))
         } else {
             Err("unknow procedure type: APPLY")
         }

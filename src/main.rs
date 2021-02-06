@@ -47,6 +47,6 @@ fn main() {
                                                        Exp::FloatNumber(1.0))))));
     env = Env(eval(y, env).unwrap());
     println!("fac defined");
-    let s = scheme_list!(Exp::Symbol("fac".to_string()), Exp::FloatNumber(4.0));
+    let s = scheme_list!(Exp::Symbol("fac".to_string()), Exp::FloatNumber(20.0));
     pretty_print(eval(s, env).unwrap());
 }
