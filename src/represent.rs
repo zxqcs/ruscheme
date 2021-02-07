@@ -159,6 +159,8 @@ pub mod  represent{
         
 
         #[allow(dead_code)]
+        // (define x 3) 
+        // (define (square x) (* x x))
         pub fn definition_value(exp: Exp) -> Exp {
             if cadr(exp.clone()).unwrap().is_symbol() {
                 caddr(exp.clone()).unwrap()
@@ -723,7 +725,6 @@ mod tests {
         assert_eq!(is_compound_procedure(procedure.clone()), true);
         assert_eq!(procedure_parameters(procedure.clone()), parameters);
         assert_eq!(procedure_body(procedure.clone()), body);
-        assert_eq!(procedure_environment(procedure.clone()).0, env.0);
     }
 
     #[test]

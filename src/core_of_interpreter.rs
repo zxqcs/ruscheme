@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{display::display::pretty_print, represent::represent::{assignment_variable, begin_actions, caar, cdar, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_number_combination, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body,procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
+    use crate::{display::display::pretty_print, represent::represent::{assignment_value, assignment_variable, begin_actions, caar, cdar, definition_value, definition_variable, first_exp, if_alternative, if_consequent, if_predicate, is_application, is_assignment, is_begin, is_compound_procedure, is_definiton, is_if, is_lambda, is_last_exp, is_number_combination, is_primitive_procedure, lambda_body, lambda_parameters, make_procedure, operands, operator, procedure_body, procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
     use crate::represent::represent::{no_operands, first_operand,rest_operands,car,cadr};
     use crate::environment::env::*;
 
@@ -207,7 +207,7 @@ pub mod core_of_interpreter {
     #[allow(dead_code)]
     fn eval_assignment(exp: Exp, env: Env) -> Exp {
         let temp = set_variable_value(assignment_variable(exp.clone()), 
-        eval(definition_value(exp), env.clone()).unwrap(), env);
+                   eval(assignment_value(exp), env.clone()).unwrap(), env);
         temp.0
     }
 
