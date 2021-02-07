@@ -1,7 +1,7 @@
 
 #![allow(unused_variables)]
 pub mod  represent{
-    use crate::{core_of_interpreter::core_of_interpreter::{Env, Exp, Pair}, display::display::pretty_print, scheme_list};
+    use crate::{core_of_interpreter::core_of_interpreter::{ Exp, Pair}, scheme_list};
     use crate::tool::tools::{scheme_cons, append};
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
