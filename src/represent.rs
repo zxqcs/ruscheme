@@ -30,6 +30,7 @@ pub mod  represent{
                     t if *t == "cons".to_string() => true,
                     t if *t == "null?".to_string() => true,
                     t if *t == "=".to_string() => true,
+                    t if *t == ">".to_string() => true,
                     _ => false,
                 }
             } else { false }
@@ -68,11 +69,17 @@ pub mod  represent{
             }        
         }
 
-        pub fn to_number(&self) -> f32 {
+        pub fn to_f32(&self) -> f32 {
             match self {
-                Exp::Integer(x) => { *x as f32},
                 Exp::FloatNumber(x) => { *x },
-                _ => { panic!("not a number!"); },
+                _ => { panic!("not a f32 !"); },
+            }
+        }
+        
+        pub fn to_i32(&self) -> i32 {
+            match self {
+                Exp::Integer(x) => { *x },
+                _ => { panic!("not a i32 !"); },
             }
         }
 

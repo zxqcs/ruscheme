@@ -239,33 +239,155 @@ pub mod core_of_interpreter {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
-                        Exp::FloatNumber(lhs.to_number() * rhs.to_number())
+                        match lhs {
+                            Exp::Integer(x) => {
+                                match rhs {
+                                    Exp::Integer(y) => {
+                                        let r = x * y;
+                                        Exp::Integer(r)
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        let r = x as f32 * y;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    _ => panic!("wrong type for multiply!"),
+                                }
+                            },
+                            Exp::FloatNumber(x) => {
+                                 match rhs {
+                                    Exp::Integer(y) => {
+                                        let r = x * y as f32;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        let r = x * y;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    _ => panic!("wrong type for multiply!"),
+                                }
+
+                            }
+                            _ => panic!("wrong type for multiply!"),
+                        }
                     } else { panic!("wrong number of args!");}
                 },
                 t if t == "/".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
-                        if rhs.to_number() == 0.0 {
-                            panic!("divide by zero!");
-                        } else {
-                            Exp::FloatNumber(lhs.to_number() / rhs.to_number())
+                        match rhs {
+                            Exp::Integer(x) => {
+                                if x == 0 {
+                                    panic!("divide by zero!");
+                                } else {
+                                    match lhs {
+                                        Exp::Integer(y) => {
+                                            Exp::FloatNumber((y as f32) / (x as f32))
+                                        },
+                                        Exp::FloatNumber(y) => {
+                                            Exp::FloatNumber(y / (x as f32))
+                                        },
+                                        _ => panic!("wrong type for division!"),
+                                    }
+                                }
+                            },
+                            Exp::FloatNumber(x) => {
+                                if x == 0.0 {
+                                    panic!("divide by zero!");
+                                } else {
+                                     match lhs {
+                                        Exp::Integer(y) => {
+                                            Exp::FloatNumber((y as f32) / x)
+                                        },
+                                        Exp::FloatNumber(y) => {
+                                            Exp::FloatNumber(y / x)
+                                        },
+                                        _ => panic!("wrong type for division!"),
+                                    }
+
+                                }
+                            },
+                            _ => panic!("wrong type for division!"),
                         }
-                    } else { panic!("wrong number of args!"); }
+                    } else { 
+                        panic!("wrong number of args!"); 
+                    }
                 },
                 t if t == "+".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
-                        Exp::FloatNumber(lhs.to_number() + rhs.to_number())
-                    } else { panic!("wrong number of args!"); }
+                         match lhs {
+                            Exp::Integer(x) => {
+                                match rhs {
+                                    Exp::Integer(y) => {
+                                        let r = x + y;
+                                        Exp::Integer(r)
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        let r = x as f32 + y;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    _ => panic!("wrong type for add!"),
+                                }
+                            },
+                            Exp::FloatNumber(x) => {
+                                 match rhs {
+                                    Exp::Integer(y) => {
+                                        let r = x + y as f32;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        let r = x + y;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    _ => panic!("wrong type for add!"),
+                                }
+
+                            }
+                            _ => panic!("wrong type for add!"),
+                        }
+                    } else { 
+                        panic!("wrong number of args!"); 
+                    }
                 },
                 t if t == "-".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
-                        Exp::FloatNumber(lhs.to_number() - rhs.to_number())
-                    } else { panic!("wrong number of args!"); }
+                        match lhs {
+                            Exp::Integer(x) => {
+                                match rhs {
+                                    Exp::Integer(y) => {
+                                        let r = x - y;
+                                        Exp::Integer(r)
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        let r = x as f32 - y;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    _ => panic!("wrong type for substract!"),
+                                }
+                            },
+                            Exp::FloatNumber(x) => {
+                                 match rhs {
+                                    Exp::Integer(y) => {
+                                        let r = x - y as f32;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        let r = x - y;
+                                        Exp::FloatNumber(r)
+                                    },
+                                    _ => panic!("wrong type for substract!"),
+                                }
+
+                            }
+                            _ => panic!("wrong type for substract!"),
+                        }
+                    } else { 
+                        panic!("wrong number of args!"); 
+                    }
                 },
                 t if t == "car".to_string() => {
                     if args.is_pair() {
@@ -303,6 +425,58 @@ pub mod core_of_interpreter {
                             Exp::Bool(false)
                         }
                     } else { panic!("wrong number of args!");} 
+                },
+                t if t == ">".to_string() => {
+                    if list_length(args.clone()) == 2 {
+                        let lhs = car(args.clone()).unwrap();
+                        let rhs = cadr(args.clone()).unwrap();
+                        match lhs {
+                            Exp::Integer(x) => {
+                                match rhs {
+                                    Exp::Integer(y) => {
+                                        if x > y {
+                                            Exp::Bool(true)
+                                        } else {
+                                            Exp::Bool(false)
+                                        }
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        let t = x as f32;
+                                        if t > y {
+                                            Exp::Bool(true)
+                                        } else {
+                                            Exp::Bool(false)
+                                        }
+                                    },
+                                    _ => panic!("type mismatch for comparision!"),
+                                }
+                            },
+                            Exp::FloatNumber(x) => {
+                                match rhs {
+                                    Exp::Integer(y) => {
+                                        let t = y as f32;
+                                        if x > t {
+                                            Exp::Bool(true)
+                                        } else {
+                                            Exp::Bool(false)
+                                        }
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        if x > y {
+                                            Exp::Bool(true)
+                                        } else {
+                                            Exp::Bool(false)
+                                        }
+                                    },
+                                    _ => panic!("type mismatch for comparision!"),
+                                }
+ 
+                            }
+                            _ => panic!("type mismatch for comparision"),
+                        }
+                    } else {
+                        panic!("wrong number of ars!");
+                    }
                 },
                 _ => { panic!("attemp to run a primitive procedure that is not implemented yet!") },
             }

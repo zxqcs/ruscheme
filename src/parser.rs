@@ -57,7 +57,7 @@ pub mod parser {
     }
 
     #[allow(dead_code)]
-    pub fn reverse(s: &mut Vec<String>) -> Vec<String> {
+    fn reverse(s: &mut Vec<String>) -> Vec<String> {
         let mut x = vec![];
         while let Some(token) = s.pop() {
             x.push(token);
@@ -67,19 +67,19 @@ pub mod parser {
 
     #[allow(dead_code)]
     pub fn build_syntax_tree(tokens: &mut Vec<String>) -> Exp {
-        let tree = assemble_abstract_syntax_tree(tokens);
+        let mut tokens = reverse(tokens);
+        let tree = build_syntax_tree_helper(&mut tokens);
         car(tree).unwrap()
     }
     #[allow(dead_code)]
-    pub fn assemble_abstract_syntax_tree(tokens: &mut Vec<String>) -> Exp {
+    fn build_syntax_tree_helper(tokens: &mut Vec<String>) -> Exp {
         let mut tree_buffer = Exp::List(Pair::Nil);
         while let Some(t) = tokens.pop() {
             let token = t;
-            println!("{:?}", token.clone());
             match token {
                 // head of a Exp::List
                 x if x == "(".to_string() => {
-                    let subtree = assemble_abstract_syntax_tree(tokens);
+                    let subtree = build_syntax_tree_helper(tokens);
                     tree_buffer = append(tree_buffer, 
                                        scheme_list!(subtree)); 
                 },
@@ -133,7 +133,7 @@ pub mod parser {
     }
 
     fn is_symbol(x: &String) -> bool {
-        x.chars().nth(0).unwrap().is_alphabetic() || x == "=" || x == "+" || x == "-" || x == "*" || x == "/"
+        x.chars().nth(0).unwrap().is_alphabetic() || x == "=" || x == "+" || x == "-" || x == "*" || x == "/" || x == ">" || x == "<"
     }
 
     fn is_f32(x: String) -> bool {
@@ -189,23 +189,11 @@ mod tests {
     }    
 
     #[test]
-    fn test_reverse() {
-        let x = vec!["1", "winter", "n"];
-        let mut s1 = x.into_iter().map(|x| x.to_string()).collect();
-        let y = reverse(&mut s1);
-        let z = vec!["n", "winter", "1"];
-        let s2: Vec<String> = z.into_iter().map(|x| x.to_string()).collect();
-        assert_eq!(y, s2);
-    }
-
-    #[test]
-    fn test_assemble_abstract_syntax_tree() {
+    fn test_build_syntax_tree() {
         let mut programs: Vec<String> = vec![];
         let mut tokens: Vec<String> = vec![];
         read_scheme_programs_from_file(&mut programs);
         tokens = tokenize(&mut programs);
-        tokens = reverse(&mut tokens);
-        println!("{:?}", tokens);
         let x = build_syntax_tree(&mut tokens);
         /* test case:
          (define (fac n) 

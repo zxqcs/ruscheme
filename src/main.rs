@@ -5,8 +5,10 @@ mod display;
 mod tool;
 mod environment;
 use display::display::pretty_print;
+use crate::parser::parser::*;
 use core_of_interpreter::core_of_interpreter::{Exp, Pair, eval};
 use tool::tools::{append, scheme_cons};
+use std::io::{self, Write};
 
 #[macro_export]
 macro_rules! scheme_list {
@@ -22,28 +24,34 @@ macro_rules! scheme_list {
     }
 }
 
+fn prompt_for_input(s: String) {
+    print!("{}", s);
+    io::stdout().flush().unwrap();
+}
+
+fn input() -> Exp {
+    let mut programs: Vec<String> = vec![]; 
+    let _input = read_scheme_programs_from_stdin(&mut programs);
+    let mut tokens = tokenize(&mut programs);
+    let x = build_syntax_tree(&mut tokens);
+    x
+}
+fn driver_loop() {
+    let input_prompt = String::from("|-> ");
+    prompt_for_input(input_prompt);
+    let exp = input();
+    println!("\n");
+    let output = eval(exp).unwrap();
+    match output {
+        Some(x) => {
+            print!("=> ");
+            pretty_print(x);
+        },
+        None => println!("OK"),
+    }
+    driver_loop();
+}
+
 fn main() {
-    let x = scheme_list!(Exp::Symbol("define".to_string()), 
-                             Exp::Symbol("x".to_string()),
-                             Exp::FloatNumber(3.0));
-    let y = scheme_list!(Exp::Symbol("define".to_string()),
-                      scheme_list!(Exp::Symbol("fac".to_string()),
-                                   Exp::Symbol("n".to_string())),
-                      scheme_list!(Exp::Symbol("if".to_string()),
-                            scheme_list!(Exp::Symbol("=".to_string()),
-                                         Exp::Symbol("n".to_string()),
-                                         Exp::FloatNumber(1.0)),
-                            Exp::FloatNumber(1.0),
-                            scheme_list!(Exp::Symbol("*".to_string()),
-                                         Exp::Symbol("n".to_string()),
-                                   scheme_list!(Exp::Symbol("fac".to_string()),
-                                          scheme_list!(Exp::Symbol("-".to_string()),
-                                                       Exp::Symbol("n".to_string()),
-                                                       Exp::FloatNumber(1.0))))));
-    let z = scheme_list!(Exp::Symbol("fac".to_string()),
-                             Exp::FloatNumber(4.0));
-    println!("Hello Rust!");
-    let _s1 = eval(x);
-    let _s2 = eval(y);
-    pretty_print(eval(z).unwrap().unwrap());
+    driver_loop();
 }
