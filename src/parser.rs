@@ -1,5 +1,8 @@
 pub mod parser {
-    //use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
+    use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, 
+                tool::tools::{append, scheme_cons},
+                represent::represent::{car},
+                scheme_list};
     use std::io;
     use std::io::prelude::*;
     use std::fs::File;
@@ -61,57 +64,98 @@ pub mod parser {
         }
         x
     }
-/*
+
+    #[allow(dead_code)]
+    pub fn build_syntax_tree(tokens: &mut Vec<String>) -> Exp {
+        let tree = assemble_abstract_syntax_tree(tokens);
+        car(tree).unwrap()
+    }
     #[allow(dead_code)]
     pub fn assemble_abstract_syntax_tree(tokens: &mut Vec<String>) -> Exp {
-        let mut tree = Exp::List(Pair::Nil); 
-        let mut exp_buffer: Vec<Exp> = vec![];
+        let mut tree_buffer = Exp::List(Pair::Nil);
         while let Some(t) = tokens.pop() {
             let token = t;
+            println!("{:?}", token.clone());
             match token {
                 // head of a Exp::List
                 x if x == "(".to_string() => {
                     let subtree = assemble_abstract_syntax_tree(tokens);
+                    tree_buffer = append(tree_buffer, 
+                                       scheme_list!(subtree)); 
                 },
                 // tail of a Exp::List 
                 x if x == ")".to_string() => {
-                    
+                    break;    
                 },
                 // bool value
-                x if x == "true" => { exp_buffer.push(Exp::Bool(true))},
-                x if x == "false" => {exp_buffer.push(Exp::Bool(false))},
+                x if x == "true" => {
+                    tree_buffer = append(tree_buffer, 
+                                         scheme_list!(Exp::Bool(true)));
+                },
+                x if x == "false" => {
+                    tree_buffer = append(tree_buffer, 
+                                         scheme_list!(Exp::Bool(false)));
+                },
+                // symbol value
+                x if is_symbol(&x) => {
+                    tree_buffer = append(tree_buffer, 
+                                         scheme_list!(Exp::Symbol(x)));
+                }
                 // scheme string, for example, "winter is coming!"
                 x if x == "\"".to_string() => {
                     let s = read_scheme_string(tokens);
-                    exp_buffer.push(s);
+                    tree_buffer = append(tree_buffer, 
+                                        scheme_list!(s));
                 },
                 // scheme quote, for example, 'winter
-                x if x.chars().nth(0) == Some('\'') => {}, 
+                x if x.chars().nth(0) == Some('\'') => {
+                    tree_buffer = append(tree_buffer, 
+                                         scheme_list!(Exp::Quote(x)));
+                }, 
+                // i32
+                x if is_i32(x.clone()) => {
+                    tree_buffer = append(tree_buffer,
+                                   scheme_list!(Exp::Integer(x.parse::<i32>().unwrap())));
+                }
                 // f32
-                x if helper(x.clone()) => {},
+                x if is_f32(x.clone()) => {
+                    tree_buffer = append(tree_buffer, 
+                                    scheme_list!(Exp::FloatNumber(x.parse::<f32>().unwrap())));
+                },
                 _ => { panic!("unknow token!"); },
             }    
         }
-        tree
+        tree_buffer
     }
 
-    fn read_scheme_string(tokens: &mut Vec<String>) -> Exp {
+    fn read_scheme_string(_tokens: &mut Vec<String>) -> Exp {
         Exp::SchemeString("hello world!".to_string())
     }
 
-    fn helper(x: String) -> bool {
+    fn is_symbol(x: &String) -> bool {
+        x.chars().nth(0).unwrap().is_alphabetic() || x == "=" || x == "+" || x == "-" || x == "*" || x == "/"
+    }
+
+    fn is_f32(x: String) -> bool {
         let s = x.parse::<f32>();
         match s {
             Ok(_x) => true,
             _ => false,
         }
     }
-*/    
+
+    fn is_i32(x: String) -> bool {
+        let s = x.parse::<i32>();
+        match s {
+            Ok(_x) => true,
+            _ => false,
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::scheme_list;
+    use crate::{display::display::pretty_print, scheme_list};
     use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
     use super::parser::*;
     use crate::tool::tools::{append, scheme_cons};
@@ -153,28 +197,37 @@ mod tests {
         let s2: Vec<String> = z.into_iter().map(|x| x.to_string()).collect();
         assert_eq!(y, s2);
     }
-/*
+
     #[test]
     fn test_assemble_abstract_syntax_tree() {
         let mut programs: Vec<String> = vec![];
         let mut tokens: Vec<String> = vec![];
         read_scheme_programs_from_file(&mut programs);
         tokens = tokenize(&mut programs);
-        let x = assemble_abstract_syntax_tree(&mut tokens);
+        tokens = reverse(&mut tokens);
+        println!("{:?}", tokens);
+        let x = build_syntax_tree(&mut tokens);
+        /* test case:
+         (define (fac n) 
+                (if (= n 1)
+                    1
+                    (* n  
+                       (fac ( - n  1)))))
+        */
         let y = scheme_list!(Exp::Symbol("define".to_string()),
                       scheme_list!(Exp::Symbol("fac".to_string()),
-                                   Exp::Symbol("n".to_string()),
+                                   Exp::Symbol("n".to_string())),
                       scheme_list!(Exp::Symbol("if".to_string()),
                             scheme_list!(Exp::Symbol("=".to_string()),
                                          Exp::Symbol("n".to_string()),
-                                         Exp::FloatNumber(1.0)),
+                                         Exp::Integer(1)),
+                                         Exp::Integer(1),
                             scheme_list!(Exp::Symbol("*".to_string()),
                                          Exp::Symbol("n".to_string()),
                                    scheme_list!(Exp::Symbol("fac".to_string()),
                                           scheme_list!(Exp::Symbol("-".to_string()),
                                                        Exp::Symbol("n".to_string()),
-                                                       Exp::FloatNumber(1.0)))))));
+                                                       Exp::Integer(1))))));
         assert_eq!(x, y);
     }
-*/    
 }

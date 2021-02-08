@@ -41,7 +41,7 @@ fn main() {
                                                        Exp::Symbol("n".to_string()),
                                                        Exp::FloatNumber(1.0))))));
     let z = scheme_list!(Exp::Symbol("fac".to_string()),
-                             Exp::FloatNumber(30.0));
+                             Exp::FloatNumber(4.0));
     println!("Hello Rust!");
     let _s1 = eval(x);
     let _s2 = eval(y);
