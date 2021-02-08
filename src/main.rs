@@ -6,7 +6,7 @@ mod tool;
 mod environment;
 use display::display::pretty_print;
 use crate::parser::parser::*;
-use core_of_interpreter::core_of_interpreter::{Exp, Pair, eval};
+use core_of_interpreter::core_of_interpreter::{Exp, eval};
 use tool::tools::{append, scheme_cons};
 use std::io::{self, Write};
 
@@ -40,7 +40,6 @@ fn driver_loop() {
     let input_prompt = String::from("|-> ");
     prompt_for_input(input_prompt);
     let exp = input();
-    println!("\n");
     let output = eval(exp).unwrap();
     match output {
         Some(x) => {

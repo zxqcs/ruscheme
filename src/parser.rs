@@ -17,6 +17,8 @@ pub mod parser {
                 Ok(line) => {
                     if !line.trim().is_empty() {
                         p.push(line);
+                    } else {
+                        break;
                     }
                 }
                 Err(_e) => break,
