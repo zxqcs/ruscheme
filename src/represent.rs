@@ -31,6 +31,8 @@ pub mod  represent{
                     t if *t == "null?".to_string() => true,
                     t if *t == "=".to_string() => true,
                     t if *t == ">".to_string() => true,
+                    t if *t == "<".to_string() => true,
+                    t if *t == "display".to_string() => true,
                     _ => false,
                 }
             } else { false }
@@ -170,7 +172,11 @@ pub mod  represent{
         // (define (square x) (* x x))
         pub fn definition_value(exp: Exp) -> Exp {
             if cadr(exp.clone()).unwrap().is_symbol() {
-                caddr(exp.clone()).unwrap()
+                if cddr(exp.clone()).unwrap() == Exp::List(Pair::Nil) {
+                    Exp::List(Pair::Nil)
+                } else {
+                    caddr(exp.clone()).unwrap()
+                }
             } else {
                 make_lambda(cdadr(exp.clone()).unwrap(),
                                     cddr(exp.clone()).unwrap())

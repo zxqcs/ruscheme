@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{represent::represent::{assignment_value, assignment_variable, 
+    use crate::{display::display::pretty_print, represent::represent::{assignment_value, assignment_variable, 
                                        begin_actions, caar, cdar, definition_value, 
                                        definition_variable, first_exp, if_alternative, 
                                        if_consequent, if_predicate, is_application, 
@@ -10,8 +10,7 @@ pub mod core_of_interpreter {
                                        is_number_combination, is_primitive_procedure, 
                                        lambda_body, lambda_parameters, make_procedure, 
                                        operands, operator, procedure_body, 
-                                       procedure_parameters, rest_exps}, 
-                tool::tools::{list_length, scheme_cons}};
+                                       procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
     use crate::represent::represent::{no_operands, first_operand,rest_operands,car,cadr};
     use crate::environment::env::*;
 
@@ -138,6 +137,9 @@ pub mod core_of_interpreter {
     /* core function of the Scheme interpreter */
     #[allow(dead_code)]
     pub fn eval(exp: Exp) -> Result<Option<Exp>, &'static str> {
+        unsafe {
+            pretty_print(ENV.clone().0);
+        }
         if exp.is_self_evaluating() {
             Ok(Some(exp))
         } else if is_number_combination(exp.clone()) {
@@ -173,7 +175,7 @@ pub mod core_of_interpreter {
     #[allow(dead_code)]
     fn apply(p: Exp, args: Exp) -> Result<Option<Exp>, &'static str> {
         if is_primitive_procedure(p.clone()) {
-            Ok(Some(apply_primitive_procedure(p, args)))
+            Ok(apply_primitive_procedure(p, args))
         } else if is_compound_procedure(p.clone()) {
             extend_environment(procedure_parameters(p.clone()), args);
             Ok(eval_sequence(procedure_body(p.clone())))
@@ -232,7 +234,7 @@ pub mod core_of_interpreter {
         None
     }
 
-    fn apply_primitive_procedure(p: Exp, args: Exp) -> Exp {
+    fn apply_primitive_procedure(p: Exp, args: Exp) -> Option<Exp> {
         if let Exp::Symbol(x) = cadr(p).unwrap() {
             match x {
                 t if t =="*".to_string() => {
@@ -244,11 +246,11 @@ pub mod core_of_interpreter {
                                 match rhs {
                                     Exp::Integer(y) => {
                                         let r = x * y;
-                                        Exp::Integer(r)
+                                        Some(Exp::Integer(r))
                                     },
                                     Exp::FloatNumber(y) => {
                                         let r = x as f32 * y;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     _ => panic!("wrong type for multiply!"),
                                 }
@@ -257,11 +259,11 @@ pub mod core_of_interpreter {
                                  match rhs {
                                     Exp::Integer(y) => {
                                         let r = x * y as f32;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     Exp::FloatNumber(y) => {
                                         let r = x * y;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     _ => panic!("wrong type for multiply!"),
                                 }
@@ -282,10 +284,10 @@ pub mod core_of_interpreter {
                                 } else {
                                     match lhs {
                                         Exp::Integer(y) => {
-                                            Exp::FloatNumber((y as f32) / (x as f32))
+                                            Some(Exp::FloatNumber((y as f32) / (x as f32)))
                                         },
                                         Exp::FloatNumber(y) => {
-                                            Exp::FloatNumber(y / (x as f32))
+                                            Some(Exp::FloatNumber(y / (x as f32)))
                                         },
                                         _ => panic!("wrong type for division!"),
                                     }
@@ -297,10 +299,10 @@ pub mod core_of_interpreter {
                                 } else {
                                      match lhs {
                                         Exp::Integer(y) => {
-                                            Exp::FloatNumber((y as f32) / x)
+                                            Some(Exp::FloatNumber((y as f32) / x))
                                         },
                                         Exp::FloatNumber(y) => {
-                                            Exp::FloatNumber(y / x)
+                                            Some(Exp::FloatNumber(y / x))
                                         },
                                         _ => panic!("wrong type for division!"),
                                     }
@@ -322,11 +324,11 @@ pub mod core_of_interpreter {
                                 match rhs {
                                     Exp::Integer(y) => {
                                         let r = x + y;
-                                        Exp::Integer(r)
+                                        Some(Exp::Integer(r))
                                     },
                                     Exp::FloatNumber(y) => {
                                         let r = x as f32 + y;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     _ => panic!("wrong type for add!"),
                                 }
@@ -335,11 +337,11 @@ pub mod core_of_interpreter {
                                  match rhs {
                                     Exp::Integer(y) => {
                                         let r = x + y as f32;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     Exp::FloatNumber(y) => {
                                         let r = x + y;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     _ => panic!("wrong type for add!"),
                                 }
@@ -352,6 +354,7 @@ pub mod core_of_interpreter {
                     }
                 },
                 t if t == "-".to_string() => {
+                    pretty_print(args.clone());
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
@@ -360,11 +363,11 @@ pub mod core_of_interpreter {
                                 match rhs {
                                     Exp::Integer(y) => {
                                         let r = x - y;
-                                        Exp::Integer(r)
+                                        Some(Exp::Integer(r))
                                     },
                                     Exp::FloatNumber(y) => {
                                         let r = x as f32 - y;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     _ => panic!("wrong type for substract!"),
                                 }
@@ -373,11 +376,11 @@ pub mod core_of_interpreter {
                                  match rhs {
                                     Exp::Integer(y) => {
                                         let r = x - y as f32;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     Exp::FloatNumber(y) => {
                                         let r = x - y;
-                                        Exp::FloatNumber(r)
+                                        Some(Exp::FloatNumber(r))
                                     },
                                     _ => panic!("wrong type for substract!"),
                                 }
@@ -391,27 +394,27 @@ pub mod core_of_interpreter {
                 },
                 t if t == "car".to_string() => {
                     if args.is_pair() {
-                        caar(args).unwrap()
+                        Some(caar(args).unwrap())
                     } else { panic!("not a proper schemem list: car"); }
                 }
                 t if t == "cdr".to_string() => {
                     if args.is_pair() {
-                        cdar(args).unwrap()
+                        Some(cdar(args).unwrap())
                     } else { panic!("not a proper schemem list: cdr"); }
                 },
                 t if t == "cons".to_string() => {
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
-                        scheme_cons(lhs, rhs)
+                        Some(scheme_cons(lhs, rhs))
                     } else { panic!("not a proper schemem list: cons"); }
                 },
                 t if t == "null?".to_string() => {
                     if list_length(args.clone()) == 1 {
                         if car(args).unwrap() == Exp::List(Pair::Nil) {
-                            Exp::Bool(true)
+                            Some(Exp::Bool(true))
                         } else {
-                            Exp::Bool(false)
+                            Some(Exp::Bool(false))
                         }
                     } else { panic!("not a proper schemem list: cons"); }
                 },
@@ -420,9 +423,9 @@ pub mod core_of_interpreter {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
                         if lhs == rhs {
-                            Exp::Bool(true)
+                            Some(Exp::Bool(true))
                         } else {
-                            Exp::Bool(false)
+                            Some(Exp::Bool(false))
                         }
                     } else { panic!("wrong number of args!");} 
                 },
@@ -435,17 +438,17 @@ pub mod core_of_interpreter {
                                 match rhs {
                                     Exp::Integer(y) => {
                                         if x > y {
-                                            Exp::Bool(true)
+                                            Some(Exp::Bool(true))
                                         } else {
-                                            Exp::Bool(false)
+                                            Some(Exp::Bool(false))
                                         }
                                     },
                                     Exp::FloatNumber(y) => {
                                         let t = x as f32;
                                         if t > y {
-                                            Exp::Bool(true)
+                                            Some(Exp::Bool(true))
                                         } else {
-                                            Exp::Bool(false)
+                                            Some(Exp::Bool(false))
                                         }
                                     },
                                     _ => panic!("type mismatch for comparision!"),
@@ -456,16 +459,16 @@ pub mod core_of_interpreter {
                                     Exp::Integer(y) => {
                                         let t = y as f32;
                                         if x > t {
-                                            Exp::Bool(true)
+                                            Some(Exp::Bool(true))
                                         } else {
-                                            Exp::Bool(false)
+                                            Some(Exp::Bool(false))
                                         }
                                     },
                                     Exp::FloatNumber(y) => {
                                         if x > y {
-                                            Exp::Bool(true)
+                                            Some(Exp::Bool(true))
                                         } else {
-                                            Exp::Bool(false)
+                                            Some(Exp::Bool(false))
                                         }
                                     },
                                     _ => panic!("type mismatch for comparision!"),
@@ -477,6 +480,64 @@ pub mod core_of_interpreter {
                     } else {
                         panic!("wrong number of ars!");
                     }
+                },
+                t if t == "<".to_string() => {
+                    if list_length(args.clone()) == 2 {
+                        let lhs = car(args.clone()).unwrap();
+                        let rhs = cadr(args.clone()).unwrap();
+                        match lhs {
+                            Exp::Integer(x) => {
+                                match rhs {
+                                    Exp::Integer(y) => {
+                                        if x > y {
+                                            Some(Exp::Bool(false))
+                                        } else {
+                                            Some(Exp::Bool(true))
+                                        }
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        let t = x as f32;
+                                        if t > y {
+                                            Some(Exp::Bool(false))
+                                        } else {
+                                            Some(Exp::Bool(true))
+                                        }
+                                    },
+                                    _ => panic!("type mismatch for comparision!"),
+                                }
+                            },
+                            Exp::FloatNumber(x) => {
+                                match rhs {
+                                    Exp::Integer(y) => {
+                                        let t = y as f32;
+                                        if x > t {
+                                            Some(Exp::Bool(false))
+                                        } else {
+                                            Some(Exp::Bool(true))
+                                        }
+                                    },
+                                    Exp::FloatNumber(y) => {
+                                        if x > y {
+                                            Some(Exp::Bool(false))
+                                        } else {
+                                            Some(Exp::Bool(true))
+                                        }
+                                    },
+                                    _ => panic!("type mismatch for comparision!"),
+                                }
+ 
+                            }
+                            _ => panic!("type mismatch for comparision"),
+                        }
+                    } else {
+                        panic!("wrong number of ars!");
+                    }
+                },
+                t if t == "display".to_string() => {
+                    println!("in display");
+                    let x = car(args).unwrap();
+                    pretty_print(eval(x).unwrap().unwrap());
+                    None
                 },
                 _ => { panic!("attemp to run a primitive procedure that is not implemented yet!") },
             }

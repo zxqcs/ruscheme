@@ -3,6 +3,20 @@ pub mod tools {
 use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, scheme_list};
 use crate::represent::represent::{car, cdr};
 
+#[macro_export]
+macro_rules! scheme_list {
+    ( $( $x:expr ),* ) => {
+        {
+            let null = Exp::List(Pair::Nil);
+            let mut temp_list = null.clone(); 
+            $(
+                temp_list = append(temp_list, scheme_cons($x, null.clone()));
+            )*
+            temp_list
+        }
+    }
+}
+
 #[allow(dead_code)]
     pub fn scheme_cons(lhs: Exp, rhs: Exp) -> Exp {
         match rhs {

@@ -71,7 +71,11 @@ pub mod parser {
     pub fn build_syntax_tree(tokens: &mut Vec<String>) -> Exp {
         let mut tokens = reverse(tokens);
         let tree = build_syntax_tree_helper(&mut tokens);
-        car(tree).unwrap()
+        if tree != Exp::List(Pair::Nil) {
+            car(tree).unwrap()
+        } else {
+            Exp::List(Pair::Nil)
+        }
     }
     #[allow(dead_code)]
     fn build_syntax_tree_helper(tokens: &mut Vec<String>) -> Exp {
@@ -89,6 +93,10 @@ pub mod parser {
                 x if x == ")".to_string() => {
                     break;    
                 },
+                x if x == "Nil".to_string() => {
+                    tree_buffer = append(tree_buffer,
+                                             Exp::List(Pair::Nil));
+                }
                 // bool value
                 x if x == "true" => {
                     tree_buffer = append(tree_buffer, 

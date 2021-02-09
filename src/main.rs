@@ -7,22 +7,7 @@ mod environment;
 use display::display::pretty_print;
 use crate::parser::parser::*;
 use core_of_interpreter::core_of_interpreter::{Exp, eval};
-use tool::tools::{append, scheme_cons};
 use std::io::{self, Write};
-
-#[macro_export]
-macro_rules! scheme_list {
-    ( $( $x:expr ),* ) => {
-        {
-            let null = Exp::List(Pair::Nil);
-            let mut temp_list = null.clone(); 
-            $(
-                temp_list = append(temp_list, scheme_cons($x, null.clone()));
-            )*
-            temp_list
-        }
-    }
-}
 
 fn prompt_for_input(s: String) {
     print!("{}", s);
@@ -46,11 +31,15 @@ fn driver_loop() {
             print!("=> ");
             pretty_print(x);
         },
-        None => println!("OK"),
+        None => println!("=> value: OK"),
     }
     driver_loop();
 }
 
 fn main() {
+    println!("This is an interpreter for considerable subset of Scheme language implemented in Rust.");
+    println!("Author: Yi; Image saved on Monday February 8, 2021 at 7:35 PM");
+    println!("Based on rustc 1.44.0 (49cae5576 2020-06-01)");
+    println!("Happy Chinese New Year!");
     driver_loop();
 }

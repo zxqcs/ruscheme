@@ -8,7 +8,9 @@ pub mod display {
             Exp::FloatNumber(x) => print!("{}", x),
             Exp::Integer(x) => print!("{}", x),
             Exp::Symbol(x) => print!("{}", x),
-            Exp::Quote(x) => print!("{}", x),
+            Exp::Quote(x) =>  {
+                print!("{}", &x[1..x.len()]);
+            },
             Exp::SchemeString(x) => print!("{}", x),
             Exp::Bool(x) => print!("{}", x),
             Exp::List(Pair::Nil) => {
