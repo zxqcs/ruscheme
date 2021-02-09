@@ -3,6 +3,7 @@
 pub mod  represent{
     use crate::{core_of_interpreter::core_of_interpreter::{ Exp, Pair}, scheme_list};
     use crate::tool::tools::{scheme_cons, append};
+    
     /* operatons on Exp as enum methods */
     #[allow(dead_code)]
     impl Exp {
@@ -310,11 +311,13 @@ pub mod  represent{
         pub fn procedure_body(p: Exp) -> Exp {
             caddr(p).unwrap()
         }
-        /* procedure_environment to be deleted */
-        // #[allow(dead_code)]
-        // pub fn procedure_environment(p: Exp) -> Env {
-        //    Env(cadddr(p).unwrap())
-        // }
+
+        /* 
+         #[allow(dead_code)]
+        pub fn procedure_environment(p: Exp) -> Env {
+            Env(cadddr(p).unwrap())
+        }
+        */
         // A procedure application is any compound expression that is 
         // not one of the above expression types
         #[allow(dead_code)]

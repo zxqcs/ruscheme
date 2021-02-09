@@ -6,7 +6,7 @@ mod tool;
 mod environment;
 use display::display::pretty_print;
 use crate::parser::parser::*;
-use core_of_interpreter::core_of_interpreter::{Exp, eval};
+use core_of_interpreter::core_of_interpreter::{ENV, Exp, eval};
 use std::io::{self, Write};
 
 fn prompt_for_input(s: String) {
@@ -25,19 +25,21 @@ fn driver_loop() {
     let input_prompt = String::from("|-> ");
     prompt_for_input(input_prompt);
     let exp = input();
-    let output = eval(exp).unwrap();
-    match output {
-        Some(x) => {
-            print!("=> ");
-            pretty_print(x);
-        },
-        None => println!("=> value: OK"),
+    unsafe {
+        let output = eval(exp, ENV.clone()).unwrap();
+        match output {
+            Some(x) => {
+                print!("=> ");
+                pretty_print(x);
+            },
+            None => println!("=> value: OK"),
+        }
     }
     driver_loop();
 }
 
 fn main() {
-    println!("This is an interpreter for considerable subset of Scheme language implemented in Rust.");
+    println!("This is an interpreter for a subset of Scheme language implemented in Rust.");
     println!("Author: Yi; Image saved on Monday February 8, 2021 at 7:35 PM");
     println!("Based on rustc 1.44.0 (49cae5576 2020-06-01)");
     println!("Happy Chinese New Year!");

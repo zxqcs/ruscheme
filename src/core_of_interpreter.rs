@@ -1,16 +1,16 @@
 #![allow(unused_variables)]
 
 pub mod core_of_interpreter {
-    use crate::{display::display::pretty_print, represent::represent::{assignment_value, assignment_variable, 
-                                       begin_actions, caar, cdar, definition_value, 
-                                       definition_variable, first_exp, if_alternative, 
-                                       if_consequent, if_predicate, is_application, 
-                                       is_assignment, is_begin, is_compound_procedure, 
-                                       is_definiton, is_if, is_lambda, is_last_exp, 
-                                       is_number_combination, is_primitive_procedure, 
-                                       lambda_body, lambda_parameters, make_procedure, 
-                                       operands, operator, procedure_body, 
-                                       procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
+    use crate::{display::display::{pretty_print}, 
+                represent::represent::{assignment_value, assignment_variable, begin_actions, 
+                                       caar, cdar, definition_value, definition_variable, 
+                                       first_exp, if_alternative, if_consequent, if_predicate, 
+                                       is_application, is_assignment, is_begin, 
+                                       is_compound_procedure, is_definiton, is_if, is_lambda, 
+                                       is_last_exp, is_number_combination, 
+                                       is_primitive_procedure, lambda_body, lambda_parameters, 
+                                       make_procedure, operands, operator, procedure_body,
+                                         procedure_parameters, rest_exps}, tool::tools::{list_length, scheme_cons}};
     use crate::represent::represent::{no_operands, first_operand,rest_operands,car,cadr};
     use crate::environment::env::*;
 
@@ -136,10 +136,7 @@ pub mod core_of_interpreter {
 
     /* core function of the Scheme interpreter */
     #[allow(dead_code)]
-    pub fn eval(exp: Exp) -> Result<Option<Exp>, &'static str> {
-        unsafe {
-            pretty_print(ENV.clone().0);
-        }
+    pub fn eval(exp: Exp, env: Env) -> Result<Option<Exp>, &'static str> {
         if exp.is_self_evaluating() {
             Ok(Some(exp))
         } else if is_number_combination(exp.clone()) {
@@ -147,25 +144,23 @@ pub mod core_of_interpreter {
         } else if exp.is_primitive_procedure() {
             Ok(Some(scheme_cons(Exp::Symbol("primitive".to_string()), exp)))
         } else if exp.is_variable(){
-            unsafe {
-                Ok(Some(lookup_variable_value(exp, ENV.clone())))
-            }
+            Ok(Some(lookup_variable_value(exp, env)))
         } else if exp.is_quoted() {
             Ok(Some(exp))
         } else if is_assignment(exp.clone()) {
-            Ok(eval_assignment(exp))
+            Ok(eval_assignment(exp, env))
         } else if is_definiton(exp.clone()) {
-            Ok(eval_definition(exp))
+            Ok(eval_definition(exp, env))
         } else if is_if(exp.clone()) {
-            Ok(eval_if(exp))
+            Ok(eval_if(exp, env))
         } else if is_lambda(exp.clone()) {
             Ok(Some(make_procedure(lambda_parameters(exp.clone()), 
                                         lambda_body(exp))))
         } else if is_begin(exp.clone()) {
-            Ok(eval_sequence(begin_actions(exp)))
+            Ok(eval_sequence(begin_actions(exp), env))
         } else if is_application(exp.clone()) {
-            apply(eval(operator(exp.clone())).unwrap().unwrap(),
-                  list_of_values(operands(exp)))
+            apply(eval(operator(exp.clone()), env.clone()).unwrap().unwrap(),
+                  list_of_values(operands(exp), env))
             
         } else {
             Err("unknow expression, type: EVAL")
@@ -177,58 +172,62 @@ pub mod core_of_interpreter {
         if is_primitive_procedure(p.clone()) {
             Ok(apply_primitive_procedure(p, args))
         } else if is_compound_procedure(p.clone()) {
-            extend_environment(procedure_parameters(p.clone()), args);
-            Ok(eval_sequence(procedure_body(p.clone())))
-        } else {
+            unsafe {
+                 Ok(eval_sequence(procedure_body(p.clone()), 
+                                   extend_environment(procedure_parameters(p.clone()),
+                                                          args,
+                                                       ENV.clone())))
+            }
+       } else {
             Err("unknow procedure type: APPLY")
         }
     }
 
     #[allow(dead_code)]
-    fn eval_sequence(exps: Exp) -> Option<Exp> {
+    fn eval_sequence(exps: Exp, env: Env) -> Option<Exp> { 
         if is_last_exp(exps.clone()) {
-            eval(first_exp(exps)).unwrap()
+            eval(first_exp(exps), env).unwrap()
         } else {
-            let temp = eval(first_exp(exps.clone())).unwrap();
-            eval_sequence(rest_exps(exps))
+            let temp = eval(first_exp(exps.clone()), env.clone()).unwrap();
+            eval_sequence(rest_exps(exps), env.clone())
         }
     }
 
     #[allow(dead_code)]
-    fn list_of_values(exps: Exp) -> Exp {
+    fn list_of_values(exps: Exp, env: Env) -> Exp {
         if no_operands(exps.clone()) {
             Exp::List(Pair::Nil)
         } else {
-            scheme_cons(eval(first_operand(exps.clone())).unwrap().unwrap(), 
-                            list_of_values(rest_operands(exps)))
+            scheme_cons(eval(first_operand(exps.clone()), env.clone()).unwrap().unwrap(), 
+                            list_of_values(rest_operands(exps), env.clone()))
         }
     }
 
     #[allow(dead_code)]
-    fn eval_if(exp: Exp) -> Option<Exp> {
-        if eval(if_predicate(exp.clone())).unwrap().unwrap() == Exp::Bool(true) {
-            eval(if_consequent(exp)).unwrap()
+    fn eval_if(exp: Exp, env: Env) -> Option<Exp> {
+        if eval(if_predicate(exp.clone()), env.clone()).unwrap().unwrap() == Exp::Bool(true) {
+            eval(if_consequent(exp), env).unwrap()
         } else {
-            eval(if_alternative(exp)).unwrap()
+            eval(if_alternative(exp), env).unwrap()
         }
     }    
 
     #[allow(dead_code)]
-    fn eval_assignment(exp: Exp) -> Option<Exp> {
+    fn eval_assignment(exp: Exp, env: Env) -> Option<Exp> {
         unsafe {
             let temp = set_variable_value(assignment_variable(exp.clone()), 
-                   eval(assignment_value(exp)).unwrap().unwrap(), ENV.clone());
+                   eval(assignment_value(exp), env.clone()).unwrap().unwrap(), env.clone());
             ENV = temp;
         }
         None
     }
 
     #[allow(dead_code)]
-    fn eval_definition(exp: Exp) -> Option<Exp> {
+    fn eval_definition(exp: Exp, env: Env) -> Option<Exp> {
         unsafe {
             let temp = define_variable(definition_variable(exp.clone()), 
-                                          eval(definition_value(exp)).unwrap().unwrap(), 
-                                                    ENV.clone());
+                                          eval(definition_value(exp), env.clone()).unwrap().unwrap(), 
+                                                    env.clone());
             ENV = temp;
         }
         None
@@ -354,7 +353,6 @@ pub mod core_of_interpreter {
                     }
                 },
                 t if t == "-".to_string() => {
-                    pretty_print(args.clone());
                     if list_length(args.clone()) == 2 {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
@@ -534,9 +532,8 @@ pub mod core_of_interpreter {
                     }
                 },
                 t if t == "display".to_string() => {
-                    println!("in display");
                     let x = car(args).unwrap();
-                    pretty_print(eval(x).unwrap().unwrap());
+                    pretty_print(x);
                     None
                 },
                 _ => { panic!("attemp to run a primitive procedure that is not implemented yet!") },
@@ -549,10 +546,9 @@ pub mod core_of_interpreter {
 
 #[cfg(test)]
 mod test {
-    use crate::{ environment::env::{extend_environment}};  
     use crate::scheme_list;
     use crate::tool::tools::{append, scheme_cons};
-    use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair, eval};
+    use crate::core_of_interpreter::core_of_interpreter::{ENV, Exp, Pair, eval};
     #[test]
     fn test_eval_self_evaluating_exp() {
         let x1 =  Exp::Integer(1);
@@ -561,158 +557,172 @@ mod test {
         let x4 = Exp::SchemeString("WINTER IS COMING!".to_string());
         let x5 = Exp::Bool(true);
         let x6 = Exp::Bool(false);
-        assert_eq!(x1.clone(), eval(x1).unwrap().unwrap());
-        assert_eq!(x2.clone(), eval(x2).unwrap().unwrap());
-        assert_eq!(x3.clone(), eval(x3).unwrap().unwrap());
-        assert_eq!(x4.clone(), eval(x4).unwrap().unwrap());
-        assert_eq!(x5.clone(), eval(x5).unwrap().unwrap());
-        assert_eq!(x6.clone(), eval(x6).unwrap().unwrap());
-    }
+        unsafe {
+        assert_eq!(x1.clone(), eval(x1, ENV.clone()).unwrap().unwrap());
+        assert_eq!(x2.clone(), eval(x2, ENV.clone()).unwrap().unwrap());
+        assert_eq!(x3.clone(), eval(x3, ENV.clone()).unwrap().unwrap());
+        assert_eq!(x4.clone(), eval(x4, ENV.clone()).unwrap().unwrap());
+        assert_eq!(x5.clone(), eval(x5, ENV.clone()).unwrap().unwrap());
+        assert_eq!(x6.clone(), eval(x6, ENV.clone()).unwrap().unwrap());
+        }
+   }
 
     #[test]
     fn test_eval_single_variable() {
-        
-        extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
-                           scheme_list!(Exp::Integer(8))); 
-        assert_eq!(eval(Exp::Symbol("x".to_string())).unwrap().unwrap(), Exp::Integer(8));
+         unsafe {
+            eval(scheme_list!(Exp::Symbol("define".to_string()),
+                              Exp::Symbol("x".to_string()),
+                              Exp::Integer(8)), ENV.clone());
+            assert_eq!(eval(Exp::Symbol("x".to_string()), ENV.clone()).unwrap().unwrap(), Exp::Integer(8));
+         }
     }
 
     #[test]
     fn test_eval_assignment() {
-        extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
-                                 scheme_list!(Exp::Integer(8))); 
-        
+        unsafe {
+        eval(scheme_list!(Exp::Symbol("define".to_string()),
+                          Exp::Symbol("x".to_string()),
+                          Exp::Integer(8)), ENV.clone());
         let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
                                           Exp::Symbol("x".to_string()), Exp::Integer(101));
-        let x = eval(assignment.clone()); 
-        assert_eq!(eval(Exp::Symbol("x".to_string())).unwrap().unwrap(), Exp::Integer(101));
+        let x = eval(assignment.clone(), ENV.clone()); 
+        assert_eq!(eval(Exp::Symbol("x".to_string()), ENV.clone()).unwrap().unwrap(), Exp::Integer(101));
+        }
     }
 
     #[test]
     fn test_eval_definition_single_variable() {
-        extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
-                           scheme_list!(Exp::Integer(8))); 
         
-        let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
-                                          Exp::Symbol("x".to_string()), 
-                                          Exp::Integer(101));
-        let x = eval(assignment.clone()); 
-        let definition = scheme_list!(Exp::Symbol("define".to_string()), 
+        unsafe {
+            eval(scheme_list!(Exp::Symbol("define".to_string()),
+                              Exp::Symbol("x".to_string()),
+                              Exp::Integer(8)), ENV.clone());
+            let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
+                                              Exp::Symbol("x".to_string()), Exp::Integer(101));
+            let x = eval(assignment.clone(), ENV.clone()); 
+            assert_eq!(eval(Exp::Symbol("x".to_string()), ENV.clone()).unwrap().unwrap(), Exp::Integer(101));
+            
+            let definition = scheme_list!(Exp::Symbol("define".to_string()), 
                                          Exp::Symbol("x".to_string()), 
                                          Exp::Integer(999));
-        let s = eval(definition.clone()); 
-        let second_definition = scheme_list!(Exp::Symbol("define".to_string()), 
+            let s = eval(definition.clone(), ENV.clone()); 
+            let second_definition = scheme_list!(Exp::Symbol("define".to_string()), 
                                                 Exp::Symbol("y".to_string()), 
                                                 Exp::Integer(333));
-        let t = eval(second_definition); 
-        assert_eq!(eval(Exp::Symbol("x".to_string())).unwrap().unwrap(), 
+            let t = eval(second_definition, ENV.clone()); 
+            assert_eq!(eval(Exp::Symbol("x".to_string()), ENV.clone()).unwrap().unwrap(), 
                    Exp::Integer(999));
-        assert_eq!(eval(Exp::Symbol("y".to_string())).unwrap().unwrap(),  
+            assert_eq!(eval(Exp::Symbol("y".to_string()), ENV.clone()).unwrap().unwrap(),  
                    Exp::Integer(333));
+        }
     }
 
     #[test]
     fn test_eval_definition_compoud_procedure() {
-        extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
-                           scheme_list!(Exp::Integer(8))); 
-        
+        unsafe {
+        eval(scheme_list!(Exp::Symbol("define".to_string()),
+                              Exp::Symbol("x".to_string()),
+                              Exp::Integer(8)), ENV.clone()); 
         let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
                                           Exp::Symbol("x".to_string()), 
                                           Exp::Integer(101));
-        let x = eval(assignment.clone()); 
+        let x = eval(assignment.clone(), ENV.clone()); 
         let definition = scheme_list!(Exp::Symbol("define".to_string()), 
                                          Exp::Symbol("x".to_string()), Exp::Integer(999));
-        let y = eval(definition); 
+        let y = eval(definition, ENV.clone()); 
         let second_definition = scheme_list!(Exp::Symbol("define".to_string()), 
                                                 Exp::Symbol("y".to_string()), 
                                                 Exp::Integer(333));
-        let z= eval(second_definition); 
+        let z= eval(second_definition, ENV.clone()); 
         let another_definition = scheme_list!(Exp::Symbol("define".to_string()), 
                                     scheme_list!(Exp::Symbol("square".to_string()),
                                                  Exp::Symbol("x".to_string())),
                                     scheme_list!(Exp::Symbol("*".to_string()),
                                                  Exp::Symbol("x".to_string()),
                                                  Exp::Symbol("x".to_string())));
-        let s = eval(another_definition.clone());
+        let s = eval(another_definition.clone(), ENV.clone());
         let app_exp = scheme_list!(Exp::Symbol("square".to_string()), 
                                        Exp::Integer(3));
-        assert_eq!(eval(app_exp).unwrap().unwrap(), Exp::FloatNumber(9.0));
-    }
+        assert_eq!(eval(app_exp, ENV.clone()).unwrap().unwrap(), Exp::FloatNumber(9.0));
+        }
+   }
 
     #[test]
     fn test_eval_primitive_procedure() {
-        extend_environment(scheme_list!(Exp::Symbol("x".to_string())), 
-                           scheme_list!(Exp::Integer(8))); 
-        
-        let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
-                                          Exp::Symbol("x".to_string()), 
-                                          Exp::Integer(101));
-        let x = eval(assignment.clone()); 
-        let definition = scheme_list!(Exp::Symbol("define".to_string()), 
-                                         Exp::Symbol("x".to_string()), 
-                                         Exp::Integer(999));
-        let y = eval(definition); 
-        let second_definition = scheme_list!(Exp::Symbol("define".to_string()), 
-                                                Exp::Symbol("y".to_string()), 
-                                                Exp::Integer(333));
-        let z= eval(second_definition); 
-        let another_definition = scheme_list!(Exp::Symbol("define".to_string()), 
-                                    scheme_list!(Exp::Symbol("square".to_string()),
-                                                 Exp::Symbol("x".to_string())),
-                                    scheme_list!(Exp::Symbol("*".to_string()),
-                                                 Exp::Symbol("x".to_string()),
-                                                 Exp::Symbol("x".to_string())));
-        let t = eval(another_definition.clone());
-        let s = scheme_list!(scheme_list!(Exp::Integer(1), Exp::Integer(2)),
-                                 scheme_list!(Exp::Integer(3), Exp::Integer(4)),
-                                 Exp::Integer(5));
-        let s_definition = scheme_list!(Exp::Symbol("define".to_string()),
-                                           Exp::Symbol("s".to_string()),
-                                           s);
-        let q = eval(s_definition.clone());
-        let car_exp = scheme_list!(Exp::Symbol("car".to_string()), 
-                                       Exp::Symbol("s".to_string()));
-        assert_eq!(eval(car_exp).unwrap().unwrap(), 
-                   scheme_list!(Exp::Integer(1), Exp::Integer(2)));
-        let cdr_exp = scheme_list!(Exp::Symbol("cdr".to_string()), 
-                                       Exp::Symbol("s".to_string()));
-        assert_eq!(eval(cdr_exp).unwrap().unwrap(),
-                 scheme_list!(scheme_list!(Exp::Integer(3), 
-                                           Exp::Integer(4)),
-                                           Exp::Integer(5)));
-        let null_exp = scheme_list!(Exp::Symbol("null?".to_string()), 
-                                        Exp::List(Pair::Nil));
-        assert_eq!(eval(null_exp.clone()).unwrap().unwrap(), Exp::Bool(true));
+        unsafe {
+            eval(scheme_list!(Exp::Symbol("define".to_string()),
+            Exp::Symbol("x".to_string()),
+            Exp::Integer(8)), ENV.clone()); 
+            let assignment = scheme_list!(Exp::Symbol("define".to_string()), 
+                                              Exp::Symbol("x".to_string()), 
+                                              Exp::Integer(101));
+            let x = eval(assignment.clone(), ENV.clone()); 
+            let definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                              Exp::Symbol("x".to_string()), 
+                                              Exp::Integer(999));
+            let y = eval(definition, ENV.clone()); 
+            let second_definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                                    Exp::Symbol("y".to_string()), 
+                                                    Exp::Integer(333));
+            let z= eval(second_definition, ENV.clone()); 
+            let another_definition = scheme_list!(Exp::Symbol("define".to_string()), 
+                                        scheme_list!(Exp::Symbol("square".to_string()),
+                                                     Exp::Symbol("x".to_string())),
+                                        scheme_list!(Exp::Symbol("*".to_string()),
+                                                     Exp::Symbol("x".to_string()),
+                                                     Exp::Symbol("x".to_string())));
+            let t = eval(another_definition.clone(), ENV.clone());
+            let s = scheme_list!(scheme_list!(Exp::Integer(1), Exp::Integer(2)),
+                                     scheme_list!(Exp::Integer(3), Exp::Integer(4)),
+                                                  Exp::Integer(5));
+            let s_definition = scheme_list!(Exp::Symbol("define".to_string()),
+                                               Exp::Symbol("s".to_string()),
+                                                s);
+            let q = eval(s_definition.clone(),ENV.clone());
+            let car_exp = scheme_list!(Exp::Symbol("car".to_string()), 
+                                           Exp::Symbol("s".to_string()));
+            assert_eq!(eval(car_exp, ENV.clone()).unwrap().unwrap(), 
+            scheme_list!(Exp::Integer(1), Exp::Integer(2)));
+            let cdr_exp = scheme_list!(Exp::Symbol("cdr".to_string()), 
+                                           Exp::Symbol("s".to_string()));
+            assert_eq!(eval(cdr_exp, ENV.clone()).unwrap().unwrap(),
+            scheme_list!(scheme_list!(Exp::Integer(3), 
+                                      Exp::Integer(4)),
+                                      Exp::Integer(5)));
+            let null_exp = scheme_list!(Exp::Symbol("null?".to_string()), 
+                                            Exp::List(Pair::Nil));
+            assert_eq!(eval(null_exp.clone(), ENV.clone()).unwrap().unwrap(), Exp::Bool(true));
 
-        let add_exp = scheme_list!(Exp::Symbol("+".to_string()), 
-                                       Exp::FloatNumber(3.15),
-                                       Exp::FloatNumber(1.85));
-        assert_eq!(eval(add_exp.clone()).unwrap().unwrap(), 
-                   Exp::FloatNumber(5.0));
+            let add_exp = scheme_list!(Exp::Symbol("+".to_string()), 
+                                           Exp::FloatNumber(3.15),
+                                           Exp::FloatNumber(1.85));
+            assert_eq!(eval(add_exp.clone(), ENV.clone()).unwrap().unwrap(), 
+                            Exp::FloatNumber(5.0));
 
-        let substract_exp = scheme_list!(Exp::Symbol("-".to_string()), 
-                                             Exp::Integer(8), 
-                                             Exp::FloatNumber(2.5));
-        assert_eq!(eval(substract_exp.clone()).unwrap().unwrap(), 
-                   Exp::FloatNumber(5.5));
+            let substract_exp = scheme_list!(Exp::Symbol("-".to_string()), 
+                                                 Exp::Integer(8), 
+                                                 Exp::FloatNumber(2.5));
+            assert_eq!(eval(substract_exp.clone(), ENV.clone()).unwrap().unwrap(), 
+                            Exp::FloatNumber(5.5));
 
-        let multiply_exp = scheme_list!(Exp::Symbol("*".to_string()), 
-                                            Exp::FloatNumber(2.5),
-                                            Exp::FloatNumber(2.5));
-        assert_eq!(eval(multiply_exp.clone()).unwrap().unwrap(), 
-                   Exp::FloatNumber(6.25));
+            let multiply_exp = scheme_list!(Exp::Symbol("*".to_string()), 
+                                                Exp::FloatNumber(2.5),
+                                                Exp::FloatNumber(2.5));
+            assert_eq!(eval(multiply_exp.clone(), ENV.clone()).unwrap().unwrap(), 
+                            Exp::FloatNumber(6.25));
 
-        let divide_exp = scheme_list!(Exp::Symbol("/".to_string()), 
-                                          Exp::FloatNumber(25.0),
-                                          Exp::FloatNumber(2.5));
-        assert_eq!(eval(divide_exp.clone()).unwrap().unwrap(), 
-                   Exp::FloatNumber(10.0));
+            let divide_exp = scheme_list!(Exp::Symbol("/".to_string()), 
+                                              Exp::FloatNumber(25.0),
+                                              Exp::FloatNumber(2.5));
+            assert_eq!(eval(divide_exp.clone(), ENV.clone()).unwrap().unwrap(), 
+                            Exp::FloatNumber(10.0));
 
-        let cons_exp = scheme_list!(Exp::Symbol("cons".to_string()), 
-                                        scheme_list!(Exp::Integer(1), Exp::Integer(2)),
-                                        scheme_list!(Exp::Integer(3), Exp::Integer(4)));
-        assert_eq!(eval(cons_exp.clone()).unwrap().unwrap(), 
-                   scheme_list!(scheme_list!(Exp::Integer(1), Exp::Integer(2)), 
-                                             Exp::Integer(3), Exp::Integer(4)));
+            let cons_exp = scheme_list!(Exp::Symbol("cons".to_string()), 
+                               scheme_list!(Exp::Integer(1), Exp::Integer(2)),
+                               scheme_list!(Exp::Integer(3), Exp::Integer(4)));
+            assert_eq!(eval(cons_exp.clone(), ENV.clone()).unwrap().unwrap(), 
+            scheme_list!(scheme_list!(Exp::Integer(1), Exp::Integer(2)), 
+                                      Exp::Integer(3), Exp::Integer(4)));
+        }        
     }
 }
