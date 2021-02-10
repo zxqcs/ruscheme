@@ -17,6 +17,10 @@ pub mod parser {
                 Ok(line) => {
                     if !line.trim().is_empty() {
                         p.push(line);
+                        let tokens = tokenize(p);
+                        if syntax_checker(&tokens) {
+                            break;
+                        }
                     } else {
                         break;
                     }
@@ -26,6 +30,34 @@ pub mod parser {
     }
         Ok(())
     } 
+
+    #[allow(dead_code)]
+    pub fn syntax_checker(t: &Vec<String>) -> bool {
+        let mut iterator = t.iter();
+        let mut left_parenthesis = 0;
+        let mut right_parenthesis = 0;
+        let mut token = iterator.next();
+        loop {
+            match token {
+                x if x == Some(&("(".to_string())) => {
+                    left_parenthesis = left_parenthesis + 1;
+                },
+                x if x == Some(&(")".to_string())) => {
+                    right_parenthesis = right_parenthesis + 1;
+                },
+                Some(_x)  => {},
+                None => {
+                    break;
+                },
+            }
+            token = iterator.next();
+        }
+        if left_parenthesis == right_parenthesis {
+            true
+        } else {
+            false
+        }
+    }
 
     #[allow(dead_code)]
     pub fn read_scheme_programs_from_file(p: &mut Vec<String>) -> io::Result<()>{
@@ -197,6 +229,14 @@ mod tests {
         ss = s.into_iter().map(|x| x.to_string()).collect();
         assert_eq!(ss, tokens);
     }    
+    
+    #[test]
+    fn test_syntax_checker() {
+        let mut programs: Vec<String> = vec![];
+        read_scheme_programs_from_file(&mut programs);
+        let tokens = tokenize(&mut programs);
+        assert_eq!(syntax_checker(&tokens), true);
+    }
 
     #[test]
     fn test_build_syntax_tree() {
