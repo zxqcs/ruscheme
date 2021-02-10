@@ -41,7 +41,6 @@ fn driver_loop() {
 fn main() {
     println!("This is an interpreter for a subset of Scheme language implemented in Rust.");
     println!("Author: Yi; Image saved on Monday February 8, 2021 at 7:35 PM");
-    println!("Based on rustc 1.44.0 (49cae5576 2020-06-01)");
-    println!("Happy Chinese New Year!");
+    println!("Happy New Year ^_^");
     driver_loop();
 }
