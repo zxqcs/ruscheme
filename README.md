@@ -2,7 +2,10 @@
 A subset of Scheme interpreter is being developed in Rust language inspired by SICP[1], Chapter 4.
 
 ### How to use
-In your terminal, change your pwd to ruscheme and just type in
+```
+git clone https://github.com/zxqcs/ruscheme
+```
+change your pwd to ruscheme and just type in
 ```
    cargo run
 ```
