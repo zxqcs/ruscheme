@@ -189,7 +189,16 @@ pub mod core_of_interpreter {
             eval(first_exp(exps), env).unwrap()
         } else {
             let temp = eval(first_exp(exps.clone()), env.clone()).unwrap();
-            eval_sequence(rest_exps(exps), env.clone())
+            match temp {
+                None => {
+                    unsafe {
+                        eval_sequence(rest_exps(exps), ENV.clone())
+                    }
+                },
+                Some(x) => {
+                    eval_sequence(rest_exps(exps), env.clone())
+                },
+            }
         }
     }
 
