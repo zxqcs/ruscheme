@@ -44,6 +44,7 @@ a interactive Scheme interpreter is at your service ^_^
 | ------ | ------ | ------ |------ |
 | null? | display | if |define |
 | eq?| set! | + | - |  
-| * | / |   |     |
+| * | / | = | > |
+| < |   |   |   |
 
 [1] http://sarabander.github.io/sicp/html/index.xhtml#SEC_Contents
