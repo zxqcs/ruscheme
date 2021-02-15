@@ -414,7 +414,15 @@ pub mod core_of_interpreter {
                         let lhs = car(args.clone()).unwrap();
                         let rhs = cadr(args.clone()).unwrap();
                         Some(scheme_cons(lhs, rhs))
-                    } else { panic!("not a proper schemem list: cons"); }
+                    } else if list_length(args.clone()) == 1 {
+                        let lhs = car(args.clone());
+                        match lhs {
+                            Ok(x) => { Some(scheme_cons(x, Exp::List(Pair::Nil)))},
+                            Err(e) => { panic!("objects of cons must contain at least one element!")},
+                        }
+                    } else { 
+                        panic!("not a proper schemem list: cons"); 
+                    }
                 },
                 t if t == "null?".to_string() => {
                     if list_length(args.clone()) == 1 {
@@ -545,6 +553,19 @@ pub mod core_of_interpreter {
                     pretty_print(x);
                     None
                 },
+                t if t == "eq?".to_string() => {
+                    if list_length(args.clone()) == 2 {
+                    let lhs = car(args.clone()).unwrap();
+                    let rhs = cadr(args.clone()).unwrap();
+                    if lhs == rhs {
+                        Some(Exp::Bool(true))
+                    } else {
+                        Some(Exp::Bool(false))
+                    }
+                    } else {
+                        panic!("eq? operation must have only two objects!");
+                    }
+                }
                 _ => { panic!("attemp to run a primitive procedure that is not implemented yet!") },
             }
         } else {

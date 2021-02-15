@@ -34,6 +34,7 @@ pub mod  represent{
                     t if *t == ">".to_string() => true,
                     t if *t == "<".to_string() => true,
                     t if *t == "display".to_string() => true,
+                    t if *t == "eq?".to_string() => true,
                     _ => false,
                 }
             } else { false }
