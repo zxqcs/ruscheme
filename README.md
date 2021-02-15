@@ -43,6 +43,7 @@ a interactive Scheme interpreter is at your service ^_^
 | cons | car | cdr |begin|
 | ------ | ------ | ------ |------ |
 | null? | display | if |define |
-| - | * | / | set!|  
+| eq?| set! | + | - |  
+| * | / |   |     |
 
 [1] http://sarabander.github.io/sicp/html/index.xhtml#SEC_Contents
