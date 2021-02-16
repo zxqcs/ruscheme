@@ -2,7 +2,7 @@
 A subset of Scheme interpreter is being developed in Rust language inspired by SICP[1], Chapter 4.
 
 
-current status => stage one completed! We have an Scheme interpreter that can handle various kinds of
+**Current status** => stage one completed! We have a Scheme interpreter that can handle various kinds of
 operation including recurisve procedures.
 
 ### How to use
