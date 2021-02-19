@@ -1,3 +1,7 @@
+//! # ruscheme
+//! 
+//! ruscheme is a Scheme interpreter implemented in Rust which runs
+//! rather fast.
 mod core_of_interpreter;
 mod represent;
 mod parser;

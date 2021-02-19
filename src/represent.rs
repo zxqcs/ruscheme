@@ -359,6 +359,13 @@ pub mod  represent{
         *exp == Exp::List(Pair::Nil)
     }
 
+    ///
+    /// # Example
+    /// ```
+    /// let x  = (1  2  3)
+    /// let x1 = 1;
+    /// assert_eq!(x1, car(x));
+    /// ```
     pub fn car(exp: Exp) -> Result<Exp, &'static str> {
         match &exp {
             Exp::List(_x) => {
@@ -373,6 +380,13 @@ pub mod  represent{
         }
     }
    
+    ///
+    /// # Example
+    /// ```
+    /// let x = (1 2 3)
+    /// let x1 = (2 3);
+    /// assert_eq!(x1, cdr(x));
+    /// ```
     #[allow(dead_code)]
     pub fn cdr(exp: Exp) -> Result<Exp, &'static str> {
         match &exp {
