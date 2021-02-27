@@ -50,6 +50,6 @@ cons | car | cdr
 car | + | display
 cdr | - | set!
 null? | * | eq!
-      | / | if
+  *    | / | if
 
 [1] http://sarabander.github.io/sicp/html/index.xhtml#SEC_Contents
