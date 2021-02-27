@@ -44,10 +44,12 @@ a interactive Scheme interpreter is at your service ^_^
 => value: 1.7739279
 ```
 ### primitive procedures implemented:
-| cons | car | cdr |begin|
-| ------ | ------ | ------ |------ |
-| null? | display | if |define |
-| eq?| set! | + | - |  
-| * | / | = | > |
+List operations | arithmetic operations | other operations
+------------ | ------------- | -------------
+cons | car | cdr
+car | + | display
+cdr | - | set!
+null? | * | eq!
+      | / | if
 
 [1] http://sarabander.github.io/sicp/html/index.xhtml#SEC_Contents
