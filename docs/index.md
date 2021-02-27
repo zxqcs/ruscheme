@@ -46,10 +46,10 @@ a interactive Scheme interpreter is at your service ^_^
 ### primitive procedures implemented:
 List operations | arithmetic operations | other operations
 ------------ | ------------- | -------------
-cons | car | cdr
-car | + | display
-cdr | - | set!
-null? | * | eq!
-  *   | / | if
+cons | + | if
+car | - | display
+cdr | * | set!
+null? | / | eq!
+
 
 [1] http://sarabander.github.io/sicp/html/index.xhtml#SEC_Contents
