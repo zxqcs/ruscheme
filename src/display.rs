@@ -1,21 +1,21 @@
 pub mod display {
     use crate::core_of_interpreter::core_of_interpreter::{Exp, Pair};
     use crate::tool::tools::scheme_cons;
-    
+
     #[allow(dead_code)]
     pub fn print(exp: Exp) {
         match exp {
             Exp::FloatNumber(x) => print!("{}", x),
             Exp::Integer(x) => print!("{}", x),
             Exp::Symbol(x) => print!("{}", x),
-            Exp::Quote(x) =>  {
+            Exp::Quote(x) => {
                 print!("{}", &x[1..x.len()]);
-            },
+            }
             Exp::SchemeString(x) => print!("{}", x),
             Exp::Bool(x) => print!("{}", x),
             Exp::List(Pair::Nil) => {
                 print!("()");
-            },
+            }
             Exp::List(Pair::Cons(x, y)) => {
                 print!("(");
                 print(*x);
@@ -28,12 +28,12 @@ pub mod display {
                     if *rhs == Pair::Nil {
                         break;
                     }
-                    print!(" "); 
+                    print!(" ");
                     temp = rhs;
                 }
                 print!(")");
-            },
-        }    
+            }
+        }
     }
 
     #[allow(dead_code)]
@@ -42,7 +42,6 @@ pub mod display {
         print(exp);
         print!("\n");
     }
-
 
     #[allow(dead_code)]
     pub fn test_display() {
@@ -61,7 +60,7 @@ pub mod display {
         let body = scheme_cons(s3.clone(), null.clone());
         // exp: ((x) (+ x x))
         let exp = scheme_cons(parameters.clone(), body.clone());
-        // (1 2 3) 
+        // (1 2 3)
         let n1 = Exp::Integer(1);
         let n2 = Exp::Integer(2);
         let n3 = Exp::Integer(3);

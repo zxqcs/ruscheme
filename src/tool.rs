@@ -1,14 +1,17 @@
 #![allow(unused_variables)]
 pub mod tools {
-use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, scheme_list};
-use crate::represent::represent::{car, cdr};
+    use crate::represent::represent::{car, cdr};
+    use crate::{
+        core_of_interpreter::core_of_interpreter::{Exp, Pair},
+        scheme_list,
+    };
 
-#[macro_export]
-macro_rules! scheme_list {
+    #[macro_export]
+    macro_rules! scheme_list {
     ( $( $x:expr ),* ) => {
         {
             let null = Exp::List(Pair::Nil);
-            let mut temp_list = null.clone(); 
+            let mut temp_list = null.clone();
             $(
                 temp_list = append(temp_list, scheme_cons($x, null.clone()));
             )*
@@ -17,7 +20,7 @@ macro_rules! scheme_list {
     }
 }
 
-#[allow(dead_code)]
+    #[allow(dead_code)]
     pub fn scheme_cons(lhs: Exp, rhs: Exp) -> Exp {
         match rhs {
             Exp::List(x) => {
@@ -25,39 +28,41 @@ macro_rules! scheme_list {
                 let s2 = Box::new(x);
                 let s3 = Pair::Cons(s1, s2);
                 Exp::List(s3)
-            },
+            }
             _ => {
                 let s1 = Box::new(Pair::Nil);
                 let s2 = Box::new(rhs);
-                let s3 = Pair::Cons(s2, s1); 
+                let s3 = Pair::Cons(s2, s1);
                 let s4 = Box::new(s3);
                 let s5 = Box::new(lhs);
                 Exp::List(Pair::Cons(s5, s4))
-            },
+            }
         }
     }
 
-#[allow(dead_code)]
+    #[allow(dead_code)]
     pub fn append(lhs: Exp, rhs: Exp) -> Exp {
         let null = Exp::List(Pair::Nil);
         if lhs == null {
             rhs
         } else {
-            scheme_cons(car(lhs.clone()).unwrap(), 
-                    append(cdr(lhs.clone()).unwrap(), rhs))
+            scheme_cons(
+                car(lhs.clone()).unwrap(),
+                append(cdr(lhs.clone()).unwrap(), rhs),
+            )
         }
     }
 
-#[allow(dead_code)]
+    #[allow(dead_code)]
     pub fn set_car(x: Exp, y: Exp) -> Result<Exp, &'static str> {
         if let Exp::List(Pair::Cons(lhs, rhs)) = x {
             Ok(Exp::List(Pair::Cons(Box::new(y), rhs)))
         } else {
-            Err( "error happens!")
+            Err("error happens!")
         }
     }
 
-#[allow(dead_code)]
+    #[allow(dead_code)]
     pub fn set_cdr(x: Exp, y: Exp) -> Result<Exp, &'static str> {
         if let Exp::List(Pair::Cons(lhs, rhs)) = x {
             Ok(scheme_cons(*lhs, y))
@@ -65,7 +70,7 @@ macro_rules! scheme_list {
             Err("error happens!")
         }
     }
-#[allow(dead_code)]
+    #[allow(dead_code)]
     pub fn list_length(exp: Exp) -> i32 {
         if exp == Exp::List(Pair::Nil) {
             0
@@ -73,19 +78,18 @@ macro_rules! scheme_list {
             1 + list_length(cdr(exp.clone()).unwrap())
         }
     }
-    
 
-#[derive(Debug, Clone)] 
-    pub struct TestData{
+    #[derive(Debug, Clone)]
+    pub struct TestData {
         pub if_expression: Exp,
         pub begin_expression: Exp,
         pub applicatioin_expressioin: Exp,
         pub lambda_expression: Exp,
     }
-        
-#[allow(dead_code)]
+
+    #[allow(dead_code)]
     pub fn generate_test_data() -> TestData {
-        // (if (= n 1)  1  (-  n  1)) 
+        // (if (= n 1)  1  (-  n  1))
         let s1 = Exp::Symbol("if".to_string());
         let s2 = Exp::Symbol("n".to_string());
         let s3 = Exp::Integer(1);
@@ -94,7 +98,7 @@ macro_rules! scheme_list {
         let x1 = scheme_list!(s5, s2.clone(), s3.clone());
         let x2 = scheme_list!(s4, s2.clone(), s3.clone());
         let if_exp = scheme_list!(s1, x1, s3.clone(), x2);
-       
+
         // (begin (set! x 5) (+ x 1))
         let t1 = Exp::Integer(5);
         let t2 = Exp::Integer(1);
@@ -110,7 +114,7 @@ macro_rules! scheme_list {
         let r1 = Exp::Symbol("lambda".to_string());
         let r2 = Exp::Symbol("x".to_string());
         let r3 = Exp::Symbol("*".to_string());
-        let null =  Exp::List(Pair::Nil);
+        let null = Exp::List(Pair::Nil);
         let r4 = scheme_cons(r2.clone(), null);
         let r5 = scheme_list!(r3, r2.clone(), r2.clone());
         let lambda_exp = scheme_list!(r1, r4, r5);
@@ -120,7 +124,7 @@ macro_rules! scheme_list {
         let p2 = Exp::Integer(3);
         let p3 = Exp::Integer(4);
         let app_exp = scheme_list!(p1, p2, p3);
-        
+
         let data = TestData {
             if_expression: if_exp,
             begin_expression: begin_exp,
@@ -137,9 +141,9 @@ macro_rules! scheme_list {
         pub extended_frame: Exp,
     }
 
-#[allow(dead_code)]
+    #[allow(dead_code)]
     impl Frames {
-        fn new(variables: Exp, values: Exp, frame: Exp, extended_frame:Exp) -> Self{
+        fn new(variables: Exp, values: Exp, frame: Exp, extended_frame: Exp) -> Self {
             Frames {
                 variables: variables,
                 values: values,
@@ -149,7 +153,7 @@ macro_rules! scheme_list {
         }
     }
 
-#[allow(dead_code)]
+    #[allow(dead_code)]
     pub fn generate_test_frames() -> Frames {
         let x = Exp::Symbol("x".to_string());
         let y = Exp::Symbol("y".to_string());
@@ -160,26 +164,28 @@ macro_rules! scheme_list {
         let a = Exp::Symbol("a".to_string());
         let four = Exp::Integer(4);
         let variables = scheme_list!(x.clone(), y.clone(), z.clone());
-        let values = scheme_list!(one.clone(), two.clone(), 
-                                                   three.clone());
+        let values = scheme_list!(one.clone(), two.clone(), three.clone());
         let extended_variables = scheme_list!(a, x, y, z);
         let extended_values = scheme_list!(four, one.clone(), two.clone(), three.clone());
         let frame = scheme_cons(variables.clone(), scheme_list!(one, two, three));
-        let extended_frame= scheme_cons(extended_variables, extended_values);
+        let extended_frame = scheme_cons(extended_variables, extended_values);
         Frames::new(variables, values, frame, extended_frame)
     }
 }
 #[cfg(test)]
 mod test {
     use super::tools::{append, list_length, scheme_cons, set_car, set_cdr};
-    use crate::{core_of_interpreter::core_of_interpreter::{Exp, Pair}, scheme_list};
-    use crate::represent::represent::{cadr, cddr, caadr};
+    use crate::represent::represent::{caadr, cadr, cddr};
+    use crate::{
+        core_of_interpreter::core_of_interpreter::{Exp, Pair},
+        scheme_list,
+    };
     #[test]
     fn test_scheme_cons() {
-    // (lambda (x) (+ x x))
-    // ((lambda (x) (+ x x)) 4) =>  8
-    // lambda prameters: (x) 
-    // lambda body: ((+ x x))
+        // (lambda (x) (+ x x))
+        // ((lambda (x) (+ x x)) 4) =>  8
+        // lambda prameters: (x)
+        // lambda body: ((+ x x))
         let plus = Exp::Symbol("+".to_string());
         let x = Exp::Symbol("x".to_string());
         let null = Exp::List(Pair::Nil);
@@ -208,8 +214,7 @@ mod test {
         let n3 = Exp::Integer(3);
         let s1 = scheme_cons(n3.clone(), null);
         let s2 = scheme_cons(n1.clone(), n2.clone());
-        let s3 = scheme_cons(n1.clone(), 
-                   scheme_cons(n2.clone(), n3.clone()));
+        let s3 = scheme_cons(n1.clone(), scheme_cons(n2.clone(), n3.clone()));
         assert_eq!(s3, append(s2, s1));
     }
 
@@ -218,7 +223,7 @@ mod test {
         // ("hello" "world")  -> ("hello" "fool")
         let hello = Exp::Symbol("hello".to_string());
         let world = Exp::Symbol("world".to_string());
-        
+
         let fool = Exp::Symbol("fool".to_string());
         let s1 = scheme_list!(hello.clone(), world);
         let s2 = scheme_list!(hello.clone(), fool.clone());
@@ -230,7 +235,7 @@ mod test {
         let hello = Exp::Symbol("hello".to_string());
         let world = Exp::Symbol("world".to_string());
         let fool = Exp::Symbol("fool".to_string());
-         
+
         let s1 = scheme_list!(hello.clone(), world.clone());
         let s2 = scheme_list!(fool.clone(), world.clone());
         assert_eq!(s2, set_car(s1, fool).unwrap());
