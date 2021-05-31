@@ -35,11 +35,7 @@ pub mod core_of_interpreter {
                 Pair::Cons(x, y) => match other {
                     Pair::Nil => false,
                     Pair::Cons(x1, y1) => {
-                        if x == x1 && y == y1 {
-                            true
-                        } else {
-                            false
-                        }
+                        x == x1 && y == y1 
                     }
                 },
             }
