@@ -72,78 +72,50 @@ pub mod core_of_interpreter {
             match self {
                 Exp::FloatNumber(x) => match other {
                     Exp::FloatNumber(y) => {
-                        if x == y {
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                        x == y
+                    },
                     _ => false,
                 },
 
                 Exp::Integer(x) => match other {
                     Exp::Integer(y) => {
-                        if x == y {
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                        x == y
+                    },
                     _ => false,
                 },
 
                 Exp::List(x) => match other {
                     Exp::List(y) => {
-                        if x == y {
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                        x == y
+                    },
                     _ => false,
                 },
 
                 Exp::Symbol(x) => match other {
                     Exp::Symbol(y) => {
-                        if x == y {
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                        x == y
+                    },
                     _ => false,
                 },
 
                 Exp::Quote(x) => match other {
                     Exp::Quote(y) => {
-                        if x == y {
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                        x == y
+                    },
                     _ => false,
                 },
 
                 Exp::Bool(x) => match other {
                     Exp::Bool(y) => {
-                        if x == y {
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                        x == y
+                    },
                     _ => false,
                 },
 
                 Exp::SchemeString(x) => match other {
                     Exp::SchemeString(y) => {
-                        if x == y {
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                        x == y
+                    },
                     _ => false,
                 },
             }
