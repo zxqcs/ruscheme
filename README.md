@@ -38,6 +38,8 @@ a interactive Scheme interpreter is at your service ^_^
        x
       (* -1 x)))
 => value: Ok
+|-> (define (sqrt x)(sqrt-iter 1.0 x))
+=> value: Ok
 |-> (sqrt 9)
 => value: 3.0000916
 |-> (sqrt (+ (sqrt 2) (sqrt 3)))
