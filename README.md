@@ -26,7 +26,7 @@ a interactive Scheme interpreter is at your service ^_^
       (average guess (/ x guess)))
 => value: Ok
 |-> (define (average x y)
-      (/ + （ x y) 2))
+      (/ (+  x y) 2))
 => value: Ok
 |-> (define (good-enough? guess x)
        (< (abs (- (square guess) x)) 0.001))
