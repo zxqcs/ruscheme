@@ -146,13 +146,14 @@ pub mod parser {
                     tree_buffer = append(tree_buffer, scheme_list!(Exp::Symbol(x)));
                 }
                 // scheme string, for example, "winter is coming!"
-                x if x == "\"".to_string() => {
-                    let s = read_scheme_string(tokens);
-                    tree_buffer = append(tree_buffer, scheme_list!(s));
+                x if x.chars().nth(0) == Some('"') => {
+                    let s = read_scheme_string(x, tokens);
+                    tree_buffer = append(tree_buffer, scheme_list!(Exp::SchemeString(s)));
                 }
                 // scheme quote, for example, 'winter
                 x if x.chars().nth(0) == Some('\'') => {
-                    tree_buffer = append(tree_buffer, scheme_list!(Exp::Quote(x)));
+                    let s = read_scheme_quote(x, tokens);
+                    tree_buffer = append(tree_buffer, scheme_list!(Exp::Quote(s)));
                 }
                 // i32
                 x if is_i32(x.clone()) => {
@@ -176,10 +177,77 @@ pub mod parser {
         tree_buffer
     }
 
-    fn read_scheme_string(_tokens: &mut Vec<String>) -> Exp {
-        Exp::SchemeString("hello world!".to_string())
+    pub fn read_scheme_string(t: String, tokens: &mut Vec<String>) -> String {
+        let mut tt = (&t[1..]).to_string();
+        loop {
+            let s = tokens.pop();
+            match s {
+                Some(x) => {
+                    if is_end_with_double_quote(&x) {
+                        tt.push(' ');
+                        let tx = &x[..(x.len() - 1)];
+                        tt.push_str(tx);
+                        return tt;
+                    } else {
+                        tt.push(' ');
+                        tt.push_str(&x);
+                    }
+                }
+                None => {
+                    panic!("missing part for a Scheme String!");
+                }
+            }
+        }
     }
 
+    pub fn is_end_with_double_quote(s: &str) -> bool {
+        s.chars().last().unwrap() == '\"'
+    }
+
+    pub fn read_scheme_quote(t: String, tokens: &mut Vec<String>) -> String {
+        if t.len() == 1 {
+            let first_token = tokens.pop().unwrap();
+            let mut left = 0;
+            let mut right = 0;
+            if first_token != "(" {
+                panic!("syntax wrong!");
+            } else {
+                let mut s = "".to_string();
+                s.push('(');
+                left = left + 1;
+                loop {
+                    let token = tokens.pop();
+                    match token {
+                        Some(x) => {
+                            if x == "(" {
+                                left = left + 1;
+                                s.push(' ');
+                                s.push('(');
+                                if left == right {
+                                    return s;
+                                }
+                            } else if x == ")" {
+                                right = right + 1;
+                                s.push(')');
+                                if left == right {
+                                    return s;
+                                }
+                            } else {
+                                s.push(' ');
+                                s.push_str(&x);
+                            }
+                        }
+                        None => {
+                            panic!("syntax wrong!");
+                        }
+                    }
+                }
+            }
+        } else {
+            let s = (&t[1..]).to_string();
+            s
+        }
+    }
     fn is_symbol(x: &String) -> bool {
         x.chars().nth(0).unwrap().is_alphabetic()
             || x == "="

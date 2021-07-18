@@ -34,9 +34,7 @@ pub mod core_of_interpreter {
                 },
                 Pair::Cons(x, y) => match other {
                     Pair::Nil => false,
-                    Pair::Cons(x1, y1) => {
-                        x == x1 && y == y1 
-                    }
+                    Pair::Cons(x1, y1) => x == x1 && y == y1,
                 },
             }
         }
@@ -52,7 +50,7 @@ pub mod core_of_interpreter {
     }
     /* everything is an Exp to be interpreted */
     #[allow(dead_code)]
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, PartialEq)]
     pub enum Exp {
         FloatNumber(f32),
         Integer(i32),
@@ -61,61 +59,6 @@ pub mod core_of_interpreter {
         Quote(String),
         SchemeString(String),
         Bool(bool),
-    }
-
-    impl PartialEq for Exp {
-        fn eq(&self, other: &Self) -> bool {
-            match self {
-                Exp::FloatNumber(x) => match other {
-                    Exp::FloatNumber(y) => {
-                        x == y
-                    },
-                    _ => false,
-                },
-
-                Exp::Integer(x) => match other {
-                    Exp::Integer(y) => {
-                        x == y
-                    },
-                    _ => false,
-                },
-
-                Exp::List(x) => match other {
-                    Exp::List(y) => {
-                        x == y
-                    },
-                    _ => false,
-                },
-
-                Exp::Symbol(x) => match other {
-                    Exp::Symbol(y) => {
-                        x == y
-                    },
-                    _ => false,
-                },
-
-                Exp::Quote(x) => match other {
-                    Exp::Quote(y) => {
-                        x == y
-                    },
-                    _ => false,
-                },
-
-                Exp::Bool(x) => match other {
-                    Exp::Bool(y) => {
-                        x == y
-                    },
-                    _ => false,
-                },
-
-                Exp::SchemeString(x) => match other {
-                    Exp::SchemeString(y) => {
-                        x == y
-                    },
-                    _ => false,
-                },
-            }
-        }
     }
 
     /* core function of the Scheme interpreter */
@@ -713,7 +656,7 @@ mod test {
             let app_exp = scheme_list!(Exp::Symbol("square".to_string()), Exp::Integer(3));
             assert_eq!(
                 eval(app_exp, ENV.clone()).unwrap().unwrap(),
-                Exp::FloatNumber(9.0)
+                Exp::Integer(9)
             );
         }
     }

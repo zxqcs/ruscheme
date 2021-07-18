@@ -9,7 +9,7 @@ pub mod display {
             Exp::Integer(x) => print!("{}", x),
             Exp::Symbol(x) => print!("{}", x),
             Exp::Quote(x) => {
-                print!("{}", &x[1..x.len()]);
+                print!("{}", &x[..]);
             }
             Exp::SchemeString(x) => print!("{}", x),
             Exp::Bool(x) => print!("{}", x),
