@@ -17,6 +17,7 @@ a interactive Scheme interpreter is at your service ^_^
 
 ### Test case
 ```
+// support compound and recursive procedures
 |-> (define (sqrt-iter guess x)
       (if (good-enough? guess x)
            guess
@@ -44,6 +45,18 @@ a interactive Scheme interpreter is at your service ^_^
 => value: 3.0000916
 |-> (sqrt (+ (sqrt 2) (sqrt 3)))
 => value: 1.7739279
+
+// support List operations 
+|-> (define x (cons 1 (cons 2  (cons 3 Nil))))
+=> value: OK
+|-> x
+=> value: (1 2 3)
+
+// support lambda procedures
+|-> (define x (lambda (x) (* x x)))
+=> value: OK
+|-> (x 3)
+=> value: 9
 ```
 ### primitive procedures implemented:
 | cons | car | cdr |begin|
@@ -51,6 +64,6 @@ a interactive Scheme interpreter is at your service ^_^
 | null? | display | if |define |
 | eq?| set! | + | - |  
 | * | / | = | > |
-| < |   |   |   |
+| < |  lambda |   |   |
 
 [1] http://sarabander.github.io/sicp/html/index.xhtml#SEC_Contents
