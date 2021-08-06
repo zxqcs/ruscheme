@@ -24,7 +24,7 @@ pub mod parser {
                             break;
                         }
                     } else {
-                        break;
+                        continue;
                     }
                 }
                 Err(_e) => break,
